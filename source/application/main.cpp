@@ -5,7 +5,7 @@
 int main()
 {
 
-    auto asteroids = std::make_unique<Asteroids>();
+    auto asteroids = std::make_unique<ast::Asteroids>();
     IEngine::run( std::move( asteroids ) );
 
     return 0;

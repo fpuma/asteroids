@@ -5,19 +5,22 @@
 
 using namespace puma;
 
-class ShipMovementSystem : public System
+namespace ast
 {
-public:
+    class ShipMovementSystem : public System
+    {
+    public:
 
-    ShipMovementSystem();
-    
-    void prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider ) override;
-    void queueRenderables( IRenderQueue& _renderQueue ) override;
-    void setShipEntity( Entity _entity ) { m_shipEntity = _entity; }
+        ShipMovementSystem();
 
-private:
+        void prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider ) override;
+        void queueRenderables( IRenderQueue& _renderQueue ) override;
+        void setShipEntity( Entity _entity ) { m_shipEntity = _entity; }
 
-    float processCurrentAngle( float _rawAngle );
+    private:
 
-    Entity m_shipEntity;
-};
+        float processCurrentAngle( float _rawAngle );
+
+        Entity m_shipEntity;
+    };
+}

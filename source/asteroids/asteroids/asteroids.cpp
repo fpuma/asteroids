@@ -4,7 +4,7 @@
 
 #include <asteroids/components/shipcomponent.h>
 #include <asteroids/fakedata/spawners/shipspawner.h>
-#include <asteroids/fakedata/ids/ids.h>
+#include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
 
 #include <engine/ecs/components/icameracomponent.h>
@@ -17,110 +17,116 @@
 
 using namespace puma;
 
-namespace
+namespace ast
 {
-    Entity spawnBackground()
+    namespace
     {
-        Entity result = gEntities->requestEntity();
+        Entity spawnBackground()
+        {
+            Entity result = gEntities->requestEntity();
 
-        gComponents->addComponent<ILocationComponent>( result );
-        auto renderComponent = gComponents->addComponent<IRenderComponent>( result );
+            gComponents->addComponent<ILocationComponent>( result );
+            auto renderComponent = gComponents->addComponent<IRenderComponent>( result );
 
-        TextureInfo textureInfo;
-        textureInfo.renderLayer = RenderLayers::Background;
-        textureInfo.renderSize = { 1000.0f,1000.0f };
-        textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
-        
-        renderComponent->addTextureInfo( textureInfo );
+            TextureInfo textureInfo;
+            textureInfo.renderLayer = gData->kRenderLayers.Background;
+            textureInfo.renderSize = { 1000.0f,1000.0f };
+            textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
 
-        gSystems->getSystem<IRenderSystem>()->registerEntity( result );
+            renderComponent->addTextureInfo( textureInfo );
 
-        return result;
+            gSystems->getSystem<IRenderSystem>()->registerEntity( result );
+
+            return result;
+        }
+
+        void unspawnBackground( Entity _entity )
+        {
+            gComponents->removeComponent<IRenderComponent>( _entity );
+            gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
+            gEntities->disposeEntity( _entity );
+        }
     }
 
-    void unspawnBackground( Entity _entity )
+    void Asteroids::init()
     {
-        gComponents->removeComponent<IRenderComponent>( _entity );
-        gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
-        gEntities->disposeEntity( _entity );
+        m_data = std::make_unique<ast::Data>();
+        puma::DefaultInstance<ast::Data>::setInstance( m_data.get() );
+
+        gEngineApplication->setWindowTitle( "Asteroids" );
+        gEngineApplication->setWindowSize( 1000, 1000 );
+        gEngineApplication->setWindowPosition( 200, 200 );
+
+        //Register classes
+        gSystems->registerSystem<ShipMovementSystem>();
+        gSystems->addSystem<ShipMovementSystem>();
+        gComponents->registerComponent<ShipComponent>();
+
+        gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
+        gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
+
+        //Inits
+        initCamera();
+        initPhysics();
+
+        gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
+        nina::Texture shipTexture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/FighterPlaneV2.png" );
+
+        //Spawn
+        m_shipEntity = ShipSpawner::spawnShip( shipTexture, Position() );
+
+        gSystems->getSystem<ICollisionSystem>()->disableDebugDraw();
+
+        m_backgroundEntity = spawnBackground();
     }
-}
 
-void Asteroids::init()
-{
-    gEngineApplication->setWindowTitle( "Asteroids" );
-    gEngineApplication->setWindowSize( 1000, 1000 );
-    gEngineApplication->setWindowPosition( 200, 200 );
+    void Asteroids::uninit()
+    {
+        unspawnBackground( m_backgroundEntity );
+        uninitCamera();
+        ShipSpawner::unspawnShip( m_shipEntity );
 
-    //Register classes
-    gSystems->registerSystem<ShipMovementSystem>();
-    gSystems->addSystem<ShipMovementSystem>();
-    gComponents->registerComponent<ShipComponent>();
+        gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
+        gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
+        gSystems->removeSystem<ShipMovementSystem>();
+    }
 
-    gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
-    gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
+    void Asteroids::update( float _deltaTime )
+    {
 
-    //Inits
-    initCamera();
-    initPhysics();
-    
-    gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
-    nina::Texture shipTexture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/FighterPlaneV2.png" );
+    }
 
-    //Spawn
-    m_shipEntity = ShipSpawner::spawnShip( shipTexture, Position() );
+    void Asteroids::initPhysics()
+    {
+        ICollisionSystem* collisionSystem = gSystems->getSystem<ICollisionSystem>();
+        collisionSystem->init( { 0.0f, 0.0f } );
+        collisionSystem->enableDebugDraw();
+    }
 
-    gSystems->getSystem<ICollisionSystem>()->disableDebugDraw();
+    void Asteroids::initCamera()
+    {
+        EntityProvider* entityProvider = gEntities;
+        ComponentProvider* componentProvider = gComponents;
 
-    m_backgroundEntity = spawnBackground();
-}
+        m_cameraEntity = entityProvider->requestEntity();
 
-void Asteroids::uninit()
-{
-    unspawnBackground( m_backgroundEntity );
-    uninitCamera();
-    ShipSpawner::unspawnShip( m_shipEntity );
+        auto cameraComponent = componentProvider->addComponent<ICameraComponent>( m_cameraEntity );
+        auto locationComponent = componentProvider->addComponent<ILocationComponent>( m_cameraEntity );
 
-    gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
-    gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
-    gSystems->removeSystem<ShipMovementSystem>();
-}
+        cameraComponent->setMetersPerPixel( 1.0f );
+        gEngineApplication->setCameraEntity( m_cameraEntity );
+        locationComponent->setPosition( Position() );
 
-void Asteroids::update( float _deltaTime )
-{
+    }
 
-}
+    void Asteroids::uninitCamera()
+    {
+        EntityProvider* entityProvider = gEntities;
+        ComponentProvider* componentProvider = gComponents;
 
-void Asteroids::initPhysics()
-{
-    ICollisionSystem* collisionSystem = gSystems->getSystem<ICollisionSystem>();
-    collisionSystem->init( { 0.0f, 0.0f } );
-    collisionSystem->enableDebugDraw();
-}
+        componentProvider->removeComponent<ICameraComponent>( m_cameraEntity );
+        componentProvider->removeComponent<ILocationComponent>( m_cameraEntity );
 
-void Asteroids::initCamera()
-{
-    EntityProvider* entityProvider = gEntities;
-    ComponentProvider* componentProvider = gComponents;
-
-    m_cameraEntity = entityProvider->requestEntity();
-
-    auto cameraComponent = componentProvider->addComponent<ICameraComponent>( m_cameraEntity );
-    auto locationComponent = componentProvider->addComponent<ILocationComponent>( m_cameraEntity );
-
-    cameraComponent->setMetersPerPixel( 1.0f );
-    gEngineApplication->setCameraEntity( m_cameraEntity );
-    locationComponent->setPosition( Position() );
-
-}
-
-void Asteroids::uninitCamera()
-{
-    EntityProvider* entityProvider = gEntities;
-    ComponentProvider* componentProvider = gComponents;
-
-    componentProvider->removeComponent<ICameraComponent>( m_cameraEntity );
-    componentProvider->removeComponent<ILocationComponent>( m_cameraEntity );
-
-    entityProvider->disposeEntity( m_cameraEntity );
+        entityProvider->disposeEntity( m_cameraEntity );
+    }
 }

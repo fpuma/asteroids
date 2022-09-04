@@ -5,12 +5,14 @@
 #include <modules/nina/ninadefinitions.h>
 
 using namespace puma;
-
-class ShipSpawner
+namespace ast
 {
-public:
+    class ShipSpawner
+    {
+    public:
 
-    static Entity spawnShip( nina::Texture _texture, Position _pos);
-    static void unspawnShip( Entity _entity );
+        static Entity spawnShip( nina::Texture _texture, Position _pos );
+        static void unspawnShip( Entity _entity );
 
-};
+    };
+}
