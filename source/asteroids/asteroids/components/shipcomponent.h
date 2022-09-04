@@ -26,7 +26,7 @@ namespace ast
 
     private:
 
-        float m_thrust = 500.0f;
+        float m_thrust = 500000.0f;
         float m_turningSpeed = PI;
         float m_desiredAngle = 0.0f;
         Vec2 m_currentForce;
