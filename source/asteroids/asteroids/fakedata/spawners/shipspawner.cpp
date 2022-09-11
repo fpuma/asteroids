@@ -75,6 +75,7 @@ namespace ast
         ComponentProvider* componentProvider = gComponents;
 
         gSystems->getSystem<ICollisionSystem>()->unregisterEntity( _entity );
+        gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
 
         componentProvider->removeComponent<ILocationComponent>( _entity );
         componentProvider->removeComponent<IInputComponent>( _entity );

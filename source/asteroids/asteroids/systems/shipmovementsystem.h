@@ -11,7 +11,8 @@ namespace ast
     {
     public:
 
-        ShipMovementSystem();
+        void onInit() override;
+        void onUninit() override;
 
         void prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider ) override;
         void queueRenderables( IRenderQueue& _renderQueue ) override;

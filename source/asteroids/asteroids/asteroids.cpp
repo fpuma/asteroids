@@ -11,6 +11,7 @@
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/ecs/components/irendercomponent.h>
 #include <engine/ecs/systems/irendersystem.h>
+#include <engine/ecs/systems/iinputsystem.h>
 #include <engine/services/iengineapplicationservice.h>
 #include <engine/services/ecsservice.h>
 #include <engine/ecs/systems/icollisionsystem.h>
@@ -57,13 +58,16 @@ namespace ast
         gEngineApplication->setWindowSize( 1000, 1000 );
         gEngineApplication->setWindowPosition( 200, 200 );
 
-        //Register classes
-        gSystems->registerSystem<ShipMovementSystem>();
-        gSystems->addSystem<ShipMovementSystem>();
-        gComponents->registerComponent<ShipComponent>();
+        auto sysProvider = gSystems;
 
-        gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
-        gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
+        sysProvider->addSystem<ICollisionSystem>();
+        sysProvider->addSystem<IRenderSystem>();
+        sysProvider->addSystem<IInputSystem>();
+
+        //Register classes
+        sysProvider->registerSystem<ShipMovementSystem>();
+        sysProvider->addSystem<ShipMovementSystem>();
+        gComponents->registerComponent<ShipComponent>();
 
         //Inits
         initCamera();
@@ -75,8 +79,6 @@ namespace ast
         //Spawn
         m_shipEntity = ShipSpawner::spawnShip( shipTexture, Position() );
 
-        gSystems->getSystem<ICollisionSystem>()->disableDebugDraw();
-
         m_backgroundEntity = spawnBackground();
     }
 
@@ -86,9 +88,13 @@ namespace ast
         uninitCamera();
         ShipSpawner::unspawnShip( m_shipEntity );
 
-        gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
-        gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
-        gSystems->removeSystem<ShipMovementSystem>();
+        auto sysProvider = gSystems;
+
+        sysProvider->removeSystem<ShipMovementSystem>();
+
+        sysProvider->removeSystem<ICollisionSystem>();
+        sysProvider->removeSystem<IRenderSystem>();
+        sysProvider->removeSystem<IInputSystem>();
     }
 
     void Asteroids::update( float _deltaTime )
@@ -99,8 +105,8 @@ namespace ast
     void Asteroids::initPhysics()
     {
         ICollisionSystem* collisionSystem = gSystems->getSystem<ICollisionSystem>();
-        collisionSystem->init( { 0.0f, 0.0f } );
-        collisionSystem->enableDebugDraw();
+        collisionSystem->setGravity( { 0.0f, 0.0f } );
+        //collisionSystem->enableDebugDraw();
     }
 
     void Asteroids::initCamera()
