@@ -20,14 +20,12 @@ namespace ast
     {
         gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
         gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
-        gSystems->subscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::CollisionStarted );
     }
 
     void ShipMovementSystem::onUninit()
     {
         gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::PrePhysics );
         gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
-        gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::CollisionStarted );
     }
 
     void ShipMovementSystem::prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )

@@ -6,6 +6,7 @@
 #include <asteroids/fakedata/spawners/shipspawner.h>
 #include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
+#include <asteroids/systems/spatialcagesystem.h>
 
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -31,7 +32,7 @@ namespace ast
 
             TextureInfo textureInfo;
             textureInfo.renderLayer = gData->kRenderLayers.Background;
-            textureInfo.renderSize = { 1000.0f,1000.0f };
+            textureInfo.renderSize = { 1920.0f,1080.0f };
             textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
 
             renderComponent->addTextureInfo( textureInfo );
@@ -55,23 +56,26 @@ namespace ast
         puma::DefaultInstance<ast::Data>::setInstance( m_data.get() );
 
         gEngineApplication->setWindowTitle( "Asteroids" );
-        gEngineApplication->setWindowSize( 1000, 1000 );
+        gEngineApplication->setWindowSize( 1920, 1080 );
         gEngineApplication->setWindowPosition( 200, 200 );
 
         auto sysProvider = gSystems;
+
+        //Register classes
+        sysProvider->registerSystem<ShipMovementSystem>();
+        sysProvider->registerSystem<SpatialCageSystem>();
+        gComponents->registerComponent<ShipComponent>();
 
         sysProvider->addSystem<ICollisionSystem>();
         sysProvider->addSystem<IRenderSystem>();
         sysProvider->addSystem<IInputSystem>();
 
-        //Register classes
-        sysProvider->registerSystem<ShipMovementSystem>();
-        sysProvider->addSystem<ShipMovementSystem>();
-        gComponents->registerComponent<ShipComponent>();
-
         //Inits
         initCamera();
         initPhysics();
+
+        sysProvider->addSystem<ShipMovementSystem>();
+        sysProvider->addSystem<SpatialCageSystem>();
 
         gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
         nina::Texture shipTexture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/FighterPlaneV2.png" );
@@ -91,6 +95,7 @@ namespace ast
         auto sysProvider = gSystems;
 
         sysProvider->removeSystem<ShipMovementSystem>();
+        sysProvider->removeSystem<SpatialCageSystem>();
 
         sysProvider->removeSystem<ICollisionSystem>();
         sysProvider->removeSystem<IRenderSystem>();
@@ -106,7 +111,8 @@ namespace ast
     {
         ICollisionSystem* collisionSystem = gSystems->getSystem<ICollisionSystem>();
         collisionSystem->setGravity( { 0.0f, 0.0f } );
-        //collisionSystem->enableDebugDraw();
+        collisionSystem->enableDebugDraw();
+        collisionSystem->setCollisionCompatibility( gData->kCollisionCompatibility );
     }
 
     void Asteroids::initCamera()

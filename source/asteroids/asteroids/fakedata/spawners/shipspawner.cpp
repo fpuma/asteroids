@@ -45,7 +45,9 @@ namespace ast
         leo::BodyInfo bodyInfo;
         Circle circle = { Vec2(), 25.0f };
         bodyInfo.shape.setAsCircle( circle );
-
+        bodyInfo.density = 0.5f;
+        bodyInfo.collisionIndex = gData->kCollisionIndexes.Ship;
+        bodyInfo.userData = (void*)shipEntity.value();
         collisionComponent->addBody( bodyInfo );
 
         //Render

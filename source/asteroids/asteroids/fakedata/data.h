@@ -1,5 +1,6 @@
 #pragma once
 
+#include <modules/leo/leodefinitions.h>
 #include <engine/utils/renderdefinitions.h>
 #include <engine/input/inputdefinitions.h>
 #include <array>
@@ -30,7 +31,7 @@ namespace ast
             const puma::RenderLayer Foreground = puma::RenderLayer( 1 );;
         } kRenderLayers;
 
-        struct AsteroidsInputActions
+        const struct AsteroidsInputActions
         {
             const puma::InputAction MoveShip = puma::InputAction( 0 );
             const puma::InputAction RotateShip = puma::InputAction( 1 );
@@ -43,6 +44,19 @@ namespace ast
                 InputActionJoystickMap( kInputActions.MoveShip, {puma::nina::ControllerJoystick::CJ_LSTICK, 0} ),
                 InputActionJoystickMap( kInputActions.RotateShip, {puma::nina::ControllerJoystick::CJ_RSTICK, 0} )
             }
+        };
+
+        const struct CollisionIndexes
+        {
+            const puma::leo::CollisionIndex Ship = 0;
+            const puma::leo::CollisionIndex SpatialCage = 1;
+            const puma::leo::CollisionIndex Asteroid = 2;
+            const puma::leo::CollisionIndex ShipSkill = 3;
+        }kCollisionIndexes;
+
+        const puma::leo::CollisionCompatibility kCollisionCompatibility =
+        {
+            {kCollisionIndexes.Ship, kCollisionIndexes.SpatialCage}
         };
 
     };
