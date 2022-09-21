@@ -59,6 +59,20 @@ namespace ast
             {kCollisionIndexes.Ship, kCollisionIndexes.SpatialCage}
         };
 
+        const struct ShipInfo
+        {
+            const float thrust = 500000.0f;
+            const float linearDamping = 0.1f;
+            const float radius = 25.0f;
+            const float density = 0.5f;
+        }kShipInfo;
+
+        const struct SpatialCageInfo
+        {
+            const float width = 1920.0f;
+            const float height = 1080.0f;
+            const float threshold = 50.0f;
+        }kSpatialCageInfo;
     };
 }
 

@@ -111,7 +111,7 @@ namespace ast
     {
         ICollisionSystem* collisionSystem = gSystems->getSystem<ICollisionSystem>();
         collisionSystem->setGravity( { 0.0f, 0.0f } );
-        collisionSystem->enableDebugDraw();
+        //collisionSystem->enableDebugDraw();
         collisionSystem->setCollisionCompatibility( gData->kCollisionCompatibility );
     }
 

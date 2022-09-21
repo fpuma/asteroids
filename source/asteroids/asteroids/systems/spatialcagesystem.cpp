@@ -28,19 +28,66 @@ namespace ast
         triggerInfo.collisionIndex = gData->kCollisionIndexes.SpatialCage;
         triggerInfo.userData = (void*)(m_spatialCage.value());
         
-        Rectangle rect = { { 800.0f, 400.0f},{-800.0f, 350.0f} };
+        float threshold = gData->kSpatialCageInfo.threshold;
+
+        Vec2 upperCorner = 
+        {
+            (gData->kSpatialCageInfo.width / 2.0f) + (threshold * 2),
+            (gData->kSpatialCageInfo.height / 2.0f) + (threshold * 2)
+        };
+
+        Vec2 lowerCorner =
+        {
+            (- gData->kSpatialCageInfo.width / 2.0f) - (threshold * 2),
+            (- gData->kSpatialCageInfo.height / 2.0f) - (threshold * 2)
+        };
+
+        //Top
+        Rectangle rect =
+        { 
+            upperCorner,
+            
+            {
+                - upperCorner.x , 
+                upperCorner.y - threshold
+            } 
+        };
         triggerInfo.shape.setAsPolygon( rect );
         m_top = collisionComponent->addTrigger( triggerInfo );
 
-        rect = { { 800.0f, -350.0f},{-800.0f, -400.0f} };
+        //Bot
+        rect = 
+        { 
+            {
+                - lowerCorner.x,
+                lowerCorner.y + threshold
+            },
+            lowerCorner 
+        };
         triggerInfo.shape.setAsPolygon( rect );
         m_bot = collisionComponent->addTrigger( triggerInfo );
 
-        rect = { { -750.0f, 400.0f},{-800.0f, -400.0f} };
+        //Left
+        rect = 
+        { 
+            { 
+                - upperCorner.x + threshold,
+                upperCorner.y
+            },
+            lowerCorner
+        };
         triggerInfo.shape.setAsPolygon( rect );
         m_left = collisionComponent->addTrigger( triggerInfo );
 
-        rect = { { 800.0f, 400.0f},{ 750.0f, -400.0f} };
+        //Right
+        rect = 
+        { 
+            upperCorner,
+            { 
+                -lowerCorner.x - threshold, 
+                lowerCorner.y
+            } 
+        };
         triggerInfo.shape.setAsPolygon( rect );
         m_right = collisionComponent->addTrigger( triggerInfo );
 
@@ -86,25 +133,25 @@ namespace ast
         Position pos = getEntityPosition( entity );
         if (_cageFramePart == m_top)
         {
-            pos.y = -324.0f;
+            pos.y += -gData->kSpatialCageInfo.height - (gData->kSpatialCageInfo.threshold - 2.0f);
             m_pendingTeleport.position = pos;
         }
 
         if (_cageFramePart == m_bot)
         {
-            pos.y = 324.0f;
+            pos.y += gData->kSpatialCageInfo.height + (gData->kSpatialCageInfo.threshold - 2.0f);
             m_pendingTeleport.position = pos;
         }
 
         if (_cageFramePart == m_left)
         {
-            pos.x = 724.0f;
+            pos.x += gData->kSpatialCageInfo.width + (gData->kSpatialCageInfo.threshold - 2.0f);
             m_pendingTeleport.position = pos;
         }
 
         if (_cageFramePart == m_right)
         {
-            pos.x = -724.0f;
+            pos.x += -gData->kSpatialCageInfo.width - (gData->kSpatialCageInfo.threshold - 2.0f);
             m_pendingTeleport.position = pos;
         }
 

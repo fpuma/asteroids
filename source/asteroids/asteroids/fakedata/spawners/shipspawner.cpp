@@ -43,9 +43,9 @@ namespace ast
         gSystems->getSystem<ICollisionSystem>()->registerEntity( shipEntity, frameInfo, leo::FrameType::Dynamic );
 
         leo::BodyInfo bodyInfo;
-        Circle circle = { Vec2(), 25.0f };
+        Circle circle = { Vec2(), gData->kShipInfo.radius };
         bodyInfo.shape.setAsCircle( circle );
-        bodyInfo.density = 0.5f;
+        bodyInfo.density = gData->kShipInfo.density;
         bodyInfo.collisionIndex = gData->kCollisionIndexes.Ship;
         bodyInfo.userData = (void*)shipEntity.value();
         collisionComponent->addBody( bodyInfo );
@@ -56,7 +56,7 @@ namespace ast
         TextureInfo textureInfo;
         textureInfo.texture = _texture;
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
-        textureInfo.renderSize = { 50.0f, 50.0f };
+        textureInfo.renderSize = { gData->kShipInfo.radius*2, gData->kShipInfo.radius*2 };
         textureInfo.offset = { Position(), -PI / 2 };
         //textureInfo.textureSample = { {0.6883f, 0.6048f}, {0.355f, 0.366f} };
         textureInfo.textureSample = { {0.6883f, 0.9400f}, {0.355f, 0.699f} };
