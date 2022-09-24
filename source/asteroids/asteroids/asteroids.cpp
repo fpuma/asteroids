@@ -3,10 +3,12 @@
 
 
 #include <asteroids/components/shipcomponent.h>
+#include <asteroids/components/shootcomponent.h>
 #include <asteroids/fakedata/spawners/shipspawner.h>
 #include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
 #include <asteroids/systems/spatialcagesystem.h>
+#include <asteroids/systems/shootsystem.h>
 
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -33,7 +35,7 @@ namespace ast
             TextureInfo textureInfo;
             textureInfo.renderLayer = gData->kRenderLayers.Background;
             textureInfo.renderSize = { 1920.0f,1080.0f };
-            textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
+            textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
 
             renderComponent->addTextureInfo( textureInfo );
 
@@ -64,7 +66,9 @@ namespace ast
         //Register classes
         sysProvider->registerSystem<ShipMovementSystem>();
         sysProvider->registerSystem<SpatialCageSystem>();
+        sysProvider->registerSystem<ShootSystem>();
         gComponents->registerComponent<ShipComponent>();
+        gComponents->registerComponent<ShootComponent>();
 
         sysProvider->addSystem<ICollisionSystem>();
         sysProvider->addSystem<IRenderSystem>();
@@ -76,12 +80,13 @@ namespace ast
 
         sysProvider->addSystem<ShipMovementSystem>();
         sysProvider->addSystem<SpatialCageSystem>();
+        sysProvider->addSystem<ShootSystem>();
 
-        gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/backgroundSpace_01.1.png" );
-        nina::Texture shipTexture = gEngineApplication->getTextureManager()->loadTexture( "../assets/asteroids/FighterPlaneV2.png" );
+        gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
+        gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
 
         //Spawn
-        m_shipEntity = ShipSpawner::spawnShip( shipTexture, Position() );
+        m_shipEntity = ShipSpawner::spawnShip( Position() );
 
         m_backgroundEntity = spawnBackground();
     }
@@ -96,6 +101,7 @@ namespace ast
 
         sysProvider->removeSystem<ShipMovementSystem>();
         sysProvider->removeSystem<SpatialCageSystem>();
+        sysProvider->removeSystem<ShootSystem>();
 
         sysProvider->removeSystem<ICollisionSystem>();
         sysProvider->removeSystem<IRenderSystem>();

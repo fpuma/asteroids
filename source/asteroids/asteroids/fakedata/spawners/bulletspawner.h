@@ -7,12 +7,12 @@
 using namespace puma;
 namespace ast
 {
-    class ShipSpawner
+    class BulletSpawner
     {
     public:
 
-        static Entity spawnShip( Position _pos );
-        static void unspawnShip( Entity _entity );
+        static Entity spawnBullet( Position _pos );
+        static void unspawnBullet( Entity _entity );
 
     };
 }

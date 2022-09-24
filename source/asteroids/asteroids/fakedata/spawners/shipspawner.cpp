@@ -2,8 +2,10 @@
 #include "shipspawner.h"
 
 #include <asteroids/components/shipcomponent.h>
+#include <asteroids/components/shootcomponent.h>
 #include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
+#include <asteroids/systems/shootsystem.h>
 
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
@@ -15,9 +17,11 @@
 #include <engine/ecs/systems/irendersystem.h>
 #include <utils/geometry/geometryhelpers.h>
 
+#include <engine/services/iengineapplicationservice.h>
+
 namespace ast
 {
-    Entity ShipSpawner::spawnShip( nina::Texture _texture, Position _pos )
+    Entity ShipSpawner::spawnShip( Position _pos )
     {
         EntityProvider* entityProvider = gEntities;
         ComponentProvider* componentProvider = gComponents;
@@ -33,6 +37,12 @@ namespace ast
         {
             inputComponent->addInputMap( inputMap.inputAction, inputMap.joystickInput );
         }
+
+        for (const auto& inputMap : gData->kShipControllerButtonInput)
+        {
+            inputComponent->addInputMap( inputMap.inputAction, inputMap.buttonInput );
+        }
+
         gSystems->getSystem<IInputSystem>()->registerEntity( shipEntity );
 
         //Collision
@@ -54,7 +64,7 @@ namespace ast
         auto renderComponent = componentProvider->addComponent<IRenderComponent>( shipEntity );
 
         TextureInfo textureInfo;
-        textureInfo.texture = _texture;
+        textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
         textureInfo.renderSize = { gData->kShipInfo.radius*2, gData->kShipInfo.radius*2 };
         textureInfo.offset = { Position(), -PI / 2 };
@@ -66,7 +76,12 @@ namespace ast
 
         //Ship
         componentProvider->addComponent<ShipComponent>( shipEntity );
+        auto shootComponent = componentProvider->addComponent<ShootComponent>( shipEntity );
+        shootComponent->setBulletSpeed( gData->kBulletInfo.speed );
+        shootComponent->setFireRate( gData->kBulletInfo.fireRate );
+
         gSystems->getSystem<ShipMovementSystem>()->setShipEntity( shipEntity );
+        gSystems->getSystem<ShootSystem>()->registerEntity( shipEntity );
 
         return shipEntity;
     }
@@ -78,10 +93,14 @@ namespace ast
 
         gSystems->getSystem<ICollisionSystem>()->unregisterEntity( _entity );
         gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
+        gSystems->getSystem<ShootSystem>()->unregisterEntity( _entity );
 
         componentProvider->removeComponent<ILocationComponent>( _entity );
         componentProvider->removeComponent<IInputComponent>( _entity );
         componentProvider->removeComponent<ICollisionComponent>( _entity );
+        componentProvider->removeComponent<IRenderComponent>( _entity );
+        componentProvider->removeComponent<ShootComponent>( _entity );
+        componentProvider->removeComponent<ShipComponent>( _entity );
 
         gSystems->getSystem<IInputSystem>()->unregisterEntity( _entity );
 

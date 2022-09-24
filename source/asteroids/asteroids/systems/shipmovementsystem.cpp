@@ -30,6 +30,8 @@ namespace ast
 
     void ShipMovementSystem::prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
     {
+        if (!gEntities->isEntityEnabled( m_shipEntity )) return;
+
         IInputComponent* inputComponent = _componentProvider.getComponent<IInputComponent>( m_shipEntity );
         ShipComponent* shipComponent = _componentProvider.getComponent<ShipComponent>( m_shipEntity );
 
