@@ -46,6 +46,7 @@ namespace ast
 
         void unspawnBackground( Entity _entity )
         {
+            gComponents->removeComponent<ILocationComponent>( _entity );
             gComponents->removeComponent<IRenderComponent>( _entity );
             gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
             gEntities->disposeEntity( _entity );

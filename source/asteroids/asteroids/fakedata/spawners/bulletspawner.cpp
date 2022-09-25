@@ -65,7 +65,7 @@ namespace ast
 
         componentProvider->removeComponent<ILocationComponent>( _entity );
         componentProvider->removeComponent<ICollisionComponent>( _entity );
-
+        componentProvider->removeComponent<IRenderComponent>( _entity );
 
         entityProvider->disposeEntity( _entity );
     }
