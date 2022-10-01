@@ -9,6 +9,7 @@
 #include <asteroids/systems/shipmovementsystem.h>
 #include <asteroids/systems/spatialcagesystem.h>
 #include <asteroids/systems/shootsystem.h>
+#include <asteroids/systems/rockssystem.h>
 
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -63,13 +64,15 @@ namespace ast
         gEngineApplication->setWindowPosition( 200, 200 );
 
         auto sysProvider = gSystems;
+        auto compProvider = gComponents;
 
         //Register classes
         sysProvider->registerSystem<ShipMovementSystem>();
         sysProvider->registerSystem<SpatialCageSystem>();
         sysProvider->registerSystem<ShootSystem>();
-        gComponents->registerComponent<ShipComponent>();
-        gComponents->registerComponent<ShootComponent>();
+        sysProvider->registerSystem<RocksSystem>();
+        compProvider->registerComponent<ShipComponent>();
+        compProvider->registerComponent<ShootComponent>();
 
         sysProvider->addSystem<ICollisionSystem>();
         sysProvider->addSystem<IRenderSystem>();
@@ -82,9 +85,11 @@ namespace ast
         sysProvider->addSystem<ShipMovementSystem>();
         sysProvider->addSystem<SpatialCageSystem>();
         sysProvider->addSystem<ShootSystem>();
+        sysProvider->addSystem<RocksSystem>();
 
         gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
         gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
+        gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
 
         //Spawn
         m_shipEntity = ShipSpawner::spawnShip( Position() );
@@ -103,6 +108,7 @@ namespace ast
         sysProvider->removeSystem<ShipMovementSystem>();
         sysProvider->removeSystem<SpatialCageSystem>();
         sysProvider->removeSystem<ShootSystem>();
+        sysProvider->removeSystem<RocksSystem>();
 
         sysProvider->removeSystem<ICollisionSystem>();
         sysProvider->removeSystem<IRenderSystem>();
@@ -132,7 +138,7 @@ namespace ast
         auto cameraComponent = componentProvider->addComponent<ICameraComponent>( m_cameraEntity );
         auto locationComponent = componentProvider->addComponent<ILocationComponent>( m_cameraEntity );
 
-        cameraComponent->setMetersPerPixel( 1.0f );
+        cameraComponent->setMetersPerPixel( 1.5f );
         gEngineApplication->setCameraEntity( m_cameraEntity );
         locationComponent->setPosition( Position() );
 

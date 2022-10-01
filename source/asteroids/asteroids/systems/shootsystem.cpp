@@ -49,13 +49,13 @@ namespace ast
 
             if (inputComponent->isActionActive( gData->kInputActions.Shoot ))
             {
-                gLogger->info("Engaged");
+                //gLogger->info("Engaged");
                 shootComponent->engage();
             }
 
             if (inputComponent->isActionActive( gData->kInputActions.StopShoot ))
             {
-                gLogger->info( "Disengaged" );
+                //gLogger->info( "Disengaged" );
                 shootComponent->disengage();
             }
 
@@ -63,7 +63,7 @@ namespace ast
             {
                 if (shootComponent->tryShoot())
                 {
-                    gLogger->info( "Shotfired" );
+                    //gLogger->info( "Shotfired" );
                     auto itBullet = std::find_if( m_bullets.begin(), m_bullets.end(), [&_entityProvider]( const Entity& bullet )
                         {
                             return !_entityProvider.isEntityEnabled( bullet );
@@ -88,7 +88,7 @@ namespace ast
         {
             ILocationComponent* locationComponent = _componentProvider.getComponent<ILocationComponent>( bullet );
             Position pos = locationComponent->getPosition();
-            if (pos.length() > 2300.0f)
+            if (pos.length() > gData->kSpatialCageInfo.oobLength)
             {
                 _entityProvider.disableEntity( bullet );
                 locationComponent->setPosition( {} );

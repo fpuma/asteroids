@@ -1,7 +1,7 @@
 #pragma once
 
 #include <modules/pina/component.h>
-#include <time/timers/countdowntimer.h>
+#include <engine/utils/cooldown.h>
 
 using namespace puma;
 
@@ -14,7 +14,7 @@ namespace ast
         void setBulletSpeed( float _speed ) { m_bulletSpeed = _speed; }
         float getBulletSpeed() const { return m_bulletSpeed; }
 
-        void setFireRate( float _rate ) { m_fireRate = _rate; m_shotCooldown.setTimeLimit( 1.0f / m_fireRate ); }
+        void setFireRate( float _rate ) { m_fireRate = _rate; m_shotCooldown.setCooldownTime( 1.0f / m_fireRate ); }
         float getFireRate() const { return m_fireRate; }
 
         void engage() { m_engage = true; }
@@ -24,31 +24,7 @@ namespace ast
 
         bool tryShoot() 
         { 
-            bool result = false;
-            switch (m_state)
-            {
-            case ShotState::CanShoot:
-            {
-                m_state = ShotState::OnCooldown;
-                m_shotCooldown.play();
-                result = true;
-                break;
-            }
-            case ShotState::OnCooldown:
-            {
-                if (m_shotCooldown.isFinished())
-                {
-                    m_shotCooldown.stop();
-                    m_shotCooldown.play();
-                    result = true;
-                }
-                break;
-            }
-            default:
-                assert( false ); // Something very wrong happened
-            }
-
-            return result;
+            return m_shotCooldown.cooldownReady();
         }
 
     private:
@@ -61,7 +37,7 @@ namespace ast
 
         float m_bulletSpeed = 50.0f;
         float m_fireRate = 2.0f;
-        CountdownTimer m_shotCooldown;
+        Cooldown m_shotCooldown;
         bool m_engage = false;
     };
 }

@@ -97,6 +97,7 @@ namespace ast
             const float width = 1920.0f;
             const float height = 1080.0f;
             const float threshold = 50.0f;
+            const float oobLength = 1100.0f;
         }kSpatialCageInfo;
 
         const struct BulletInfo
@@ -106,10 +107,18 @@ namespace ast
             const float fireRate = 5.0f;
         }kBulletInfo;
 
+        const struct RockInfo
+        {
+            const float speed = 50.0f;
+            const float radius = 50.0f;
+            const float spawnRate = 1.0f;
+        }kRockInfo;
+
         const struct TexturePaths
         {
             const char* ShipSprite = "../assets/asteroids/FighterPlaneV2.png";
             const char* BackgroundTexture = "../assets/asteroids/backgroundSpace_01.1.png";
+            const char* RockTexture = "../assets/asteroids/rocks/Asteroids_128x128_001.png";
         }kTexturePaths;
     };
 }

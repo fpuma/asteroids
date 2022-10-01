@@ -1,5 +1,5 @@
 #include <precompiledengine.h>
-#include "bulletspawner.h"
+#include "rockspawner.h"
 
 #include <asteroids/fakedata/data.h>
 
@@ -15,47 +15,45 @@
 
 namespace ast
 {
-    Entity BulletSpawner::spawnBullet( Position _pos )
+    Entity RockSpawner::spawnRock( )
     {
         EntityProvider* entityProvider = gEntities;
         ComponentProvider* componentProvider = gComponents;
 
-        Entity bulletEntity = entityProvider->requestEntity();
+        Entity rockEntity = entityProvider->requestEntity();
 
         //Location
-        componentProvider->addComponent<ILocationComponent>( bulletEntity );
+        componentProvider->addComponent<ILocationComponent>( rockEntity );
 
         //Collision
-        auto collisionComponent = componentProvider->addComponent<ICollisionComponent>( bulletEntity );
+        auto collisionComponent = componentProvider->addComponent<ICollisionComponent>( rockEntity );
 
         leo::FrameInfo frameInfo;
-        gSystems->getSystem<ICollisionSystem>()->registerEntity( bulletEntity, frameInfo, leo::FrameType::Kinematic );
+        gSystems->getSystem<ICollisionSystem>()->registerEntity( rockEntity, frameInfo, leo::FrameType::Dynamic );
 
-        leo::TriggerInfo triggerInfo;
-        Circle circle = { Vec2(), gData->kBulletInfo.radius };
-        triggerInfo.shape.setAsCircle( circle );
+        leo::BodyInfo bodyInfo;
+        Circle circle = { Vec2(), gData->kRockInfo.radius };
+        bodyInfo.shape.setAsCircle( circle );
         
-        triggerInfo.collisionIndex = gData->kCollisionIndexes.ShipSkill;
-        triggerInfo.userData = (void*)bulletEntity.value();
-        collisionComponent->addTrigger( triggerInfo );
+        bodyInfo.collisionIndex = gData->kCollisionIndexes.Asteroid;
+        bodyInfo.userData = (void*)rockEntity.value();
+        collisionComponent->addBody( bodyInfo );
 
         //Render
-        auto renderComponent = componentProvider->addComponent<IRenderComponent>( bulletEntity );
+        auto renderComponent = componentProvider->addComponent<IRenderComponent>( rockEntity );
 
         TextureInfo textureInfo;
-        textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
+        textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
-        textureInfo.renderSize = { gData->kBulletInfo.radius*2, gData->kBulletInfo.radius*2 };
-        //textureInfo.textureSample = { {0.6883f, 0.6048f}, {0.355f, 0.366f} };
-        textureInfo.textureSample = { {1.0f, 1.0f}, {0.666f, 0.666f} };
+        textureInfo.renderSize = { gData->kRockInfo.radius*2, gData->kRockInfo.radius*2 };
 
         renderComponent->addTextureInfo( textureInfo );
-        gSystems->getSystem<IRenderSystem>()->registerEntity( bulletEntity );
+        gSystems->getSystem<IRenderSystem>()->registerEntity( rockEntity );
 
-        return bulletEntity;
+        return rockEntity;
     }
 
-    void BulletSpawner::unspawnBullet( Entity _entity )
+    void RockSpawner::unspawnRock( Entity _entity )
     {
         EntityProvider* entityProvider = gEntities;
         ComponentProvider* componentProvider = gComponents;
