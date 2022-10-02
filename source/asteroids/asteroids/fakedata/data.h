@@ -77,11 +77,14 @@ namespace ast
             const puma::leo::CollisionIndex SpatialCage = 1;
             const puma::leo::CollisionIndex Asteroid = 2;
             const puma::leo::CollisionIndex ShipSkill = 3;
+            const puma::leo::CollisionIndex Playfield = 4;
         }kCollisionIndexes;
 
         const puma::leo::CollisionCompatibility kCollisionCompatibility =
         {
-            {kCollisionIndexes.Ship, kCollisionIndexes.SpatialCage}
+            {kCollisionIndexes.Ship, kCollisionIndexes.SpatialCage},
+            {kCollisionIndexes.ShipSkill, kCollisionIndexes.Playfield},
+            {kCollisionIndexes.Asteroid, kCollisionIndexes.Playfield},
         };
 
         const struct ShipInfo

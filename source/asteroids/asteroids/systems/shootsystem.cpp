@@ -76,22 +76,11 @@ namespace ast
                     ICollisionComponent* collisionComponent = _componentProvider.getComponent<ICollisionComponent>(currentBullet);
                     ILocationComponent* locationComponent = _componentProvider.getComponent<ILocationComponent>( shooter );
 
-                    leo::IKinematicFrame* frame = collisionComponent->getKinematicFrame();
+                    leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
                     Vec2 velocity = GeometryHelpers::rotatePoint2D( { 1.0f, 0 }, locationComponent->getRadiansRotation() ) * shootComponent->getBulletSpeed();
                     frame->setLinearVelocity( velocity );
                     frame->setPosition( { locationComponent->getPosition().x, locationComponent->getPosition().y } );
                 }
-            }
-        }
-
-        for (const Entity& bullet : m_bullets)
-        {
-            ILocationComponent* locationComponent = _componentProvider.getComponent<ILocationComponent>( bullet );
-            Position pos = locationComponent->getPosition();
-            if (pos.length() > gData->kSpatialCageInfo.oobLength)
-            {
-                _entityProvider.disableEntity( bullet );
-                locationComponent->setPosition( {} );
             }
         }
     }

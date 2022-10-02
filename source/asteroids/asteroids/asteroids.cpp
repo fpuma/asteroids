@@ -10,6 +10,7 @@
 #include <asteroids/systems/spatialcagesystem.h>
 #include <asteroids/systems/shootsystem.h>
 #include <asteroids/systems/rockssystem.h>
+#include <asteroids/systems/outofboundsystem.h>
 
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -71,6 +72,7 @@ namespace ast
         sysProvider->registerSystem<SpatialCageSystem>();
         sysProvider->registerSystem<ShootSystem>();
         sysProvider->registerSystem<RocksSystem>();
+        sysProvider->registerSystem<OutOfBoundSystem>();
         compProvider->registerComponent<ShipComponent>();
         compProvider->registerComponent<ShootComponent>();
 
@@ -86,6 +88,7 @@ namespace ast
         sysProvider->addSystem<SpatialCageSystem>();
         sysProvider->addSystem<ShootSystem>();
         sysProvider->addSystem<RocksSystem>();
+        sysProvider->addSystem<OutOfBoundSystem>();
 
         gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
         gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
@@ -109,6 +112,7 @@ namespace ast
         sysProvider->removeSystem<SpatialCageSystem>();
         sysProvider->removeSystem<ShootSystem>();
         sysProvider->removeSystem<RocksSystem>();
+        sysProvider->removeSystem<OutOfBoundSystem>();
 
         sysProvider->removeSystem<ICollisionSystem>();
         sysProvider->removeSystem<IRenderSystem>();

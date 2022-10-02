@@ -29,7 +29,7 @@ namespace ast
         auto collisionComponent = componentProvider->addComponent<ICollisionComponent>( bulletEntity );
 
         leo::FrameInfo frameInfo;
-        gSystems->getSystem<ICollisionSystem>()->registerEntity( bulletEntity, frameInfo, leo::FrameType::Kinematic );
+        gSystems->getSystem<ICollisionSystem>()->registerEntity( bulletEntity, frameInfo, leo::FrameType::Dynamic );
 
         leo::TriggerInfo triggerInfo;
         Circle circle = { Vec2(), gData->kBulletInfo.radius };
