@@ -4,7 +4,7 @@
 #include <modules/pina/entity.h>
 #include <engine/utils/cooldown.h>
 #include <array>
-#include <set>
+#include <utils/random.h>
 
 using namespace puma;
 
@@ -24,5 +24,9 @@ namespace ast
 
         std::array<Entity, 100> m_rocks;
         Cooldown m_spawnCooldown;
+
+        std::array<Rectangle, 8> m_rockPoints;
+
+        Random m_random;
     };
 }

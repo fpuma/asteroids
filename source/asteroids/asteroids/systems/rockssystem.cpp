@@ -14,6 +14,23 @@
 namespace ast
 {
 
+    namespace
+    {
+        Vec2 randomPoint( const Rectangle& _rect, puma::Random& _random )
+        {
+            Vec2 result;
+            unsigned int min = static_cast<unsigned int>(_rect.lowerBoundary.x * 1000.0f);
+            unsigned int max = static_cast<unsigned int>(_rect.upperBoundary.x * 1000.0f);
+            result.x = static_cast<float>(_random.generateRandom(min, max)) / 1000.0f;
+
+            min = static_cast<unsigned int>(_rect.lowerBoundary.y * 1000.0f);
+            max = static_cast<unsigned int>(_rect.upperBoundary.y * 1000.0f);
+            result.y = static_cast<float>(_random.generateRandom( min, max )) / 1000.0f;
+
+            return result;
+        }
+    }
+
     void RocksSystem::onInit()
     {
         gSystems->subscribeSystemUpdate<RocksSystem>( SystemUpdateId::PrePhysics );
@@ -25,6 +42,31 @@ namespace ast
         }
 
         m_spawnCooldown.setCooldownTime( 1.0f / gData->kRockInfo.spawnRate );
+
+        Vec2 upperCorner =
+        {
+            (gData->kSpatialCageInfo.width / 2.0f) /*+ gData->kRockInfo.radius*/,
+            (gData->kSpatialCageInfo.height / 2.0f) /*+ (gData->kRockInfo.radius)*/
+        };
+
+        Vec2 lowerCorner =
+        {
+            (-gData->kSpatialCageInfo.width / 2.0f) /*- gData->kRockInfo.radius*/,
+            (-gData->kSpatialCageInfo.height / 2.0f) /*- gData->kRockInfo.radius*/
+        };
+
+
+
+        m_rockPoints[0] = { upperCorner, {0.0f, upperCorner.y} };
+        m_rockPoints[1] = { {0.0f, upperCorner.y}, { lowerCorner.x, upperCorner.y } };
+        m_rockPoints[2] = { { lowerCorner.x, upperCorner.y }, {lowerCorner.x, 0.0f} };
+        m_rockPoints[3] = { { lowerCorner.x, 0.0f }, lowerCorner };
+        m_rockPoints[4] = { { 0.0f, lowerCorner.y }, lowerCorner };
+        m_rockPoints[5] = { { upperCorner.x, lowerCorner.y }, { 0.0f, lowerCorner.y } };
+        m_rockPoints[6] = { { upperCorner.x, 0.0f}, { upperCorner.x, lowerCorner.y } };
+        m_rockPoints[7] = { upperCorner, {upperCorner.x, 0.0f} };
+
+        m_random.refreshSeed( 888 );
 
     }
 
@@ -55,9 +97,18 @@ namespace ast
                 _entityProvider.enableEntity( rockEntity );
                 ICollisionComponent* collisionComponent = _componentProvider.getComponent<ICollisionComponent>( rockEntity );
 
+                u32 index = m_random.generateRandom( 0, 7 );
+                Position origin = randomPoint( m_rockPoints[index], m_random );
+
+                index += 3;
+                index = index > 7 ? (index % 7) - 1 : index;
+                Position destination = randomPoint( m_rockPoints[index], m_random );
+
                 leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
-                frame->setPosition( {} );
-                frame->setLinearVelocity( { 25.0f, 0.0f } );
+                frame->setPosition( origin );
+                Vec2 dir = destination - origin;
+                dir = dir.normalize();
+                frame->setLinearVelocity( dir * 100.0f );
             }
         }
      
