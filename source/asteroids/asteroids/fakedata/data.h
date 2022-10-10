@@ -33,8 +33,32 @@ namespace ast
         puma::ControllerButtonInput buttonInput;
     };
 
+    struct InputActionMouseButtonMap
+    {
+        InputActionMouseButtonMap( puma::InputAction _ia, puma::MouseButtonInput _mi )
+            : inputAction( _ia )
+            , buttonInput( _mi )
+        {}
+
+        puma::InputAction inputAction;
+        puma::MouseButtonInput buttonInput;
+    };
+
+    struct InputActionKeyboardMap
+    {
+        InputActionKeyboardMap( puma::InputAction _ia, puma::KeyboardInput _ki )
+            : inputAction( _ia )
+            , keyInput( _ki )
+        {}
+
+        puma::InputAction inputAction;
+        puma::KeyboardInput keyInput;
+    };
+
     using InputActionControllerJoystickPairList = std::array<InputActionJoystickMap, 2>;
     using InputActionControllerButtonPairList = std::array<InputActionControllerButtonMap, 2>;
+    using InputActionMouseButtonPairList = std::array<InputActionMouseButtonMap, 2>;
+    using InputActionKeyboardButtonPairList = std::array<InputActionKeyboardMap, 8>;
 
     class Data
     {
@@ -52,6 +76,19 @@ namespace ast
             const puma::InputAction RotateShip = puma::InputAction( 1 );
             const puma::InputAction Shoot = puma::InputAction( 2 );
             const puma::InputAction StopShoot = puma::InputAction( 3 );
+            
+            const puma::InputAction MouseAimShip = puma::InputAction( 4 );
+
+            const puma::InputAction StartMoveShipUp = puma::InputAction( 5 );
+            const puma::InputAction StartMoveShipDown = puma::InputAction( 6 );
+            const puma::InputAction StartMoveShipLeft = puma::InputAction( 7 );
+            const puma::InputAction StartMoveShipRight = puma::InputAction( 8 );
+
+            const puma::InputAction StopMoveShipUp = puma::InputAction( 9 );
+            const puma::InputAction StopMoveShipDown = puma::InputAction( 10 );
+            const puma::InputAction StopMoveShipLeft = puma::InputAction( 11 );
+            const puma::InputAction StopMoveShipRight = puma::InputAction( 12 );
+
         } kInputActions;
 
 
@@ -70,6 +107,31 @@ namespace ast
                 InputActionControllerButtonMap( kInputActions.StopShoot, {puma::nina::ControllerButton::CB_RB, 0, nina::InputButtonEvent::Released} ),
             }
         };
+
+        const InputActionMouseButtonPairList kShipMouseButtonInput =
+        {
+            {
+                InputActionMouseButtonMap( kInputActions.Shoot,     {puma::nina::MouseButton::MB_LEFT, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Pressed} ),
+                InputActionMouseButtonMap( kInputActions.StopShoot, {puma::nina::MouseButton::MB_LEFT, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released} ),
+            }
+        };
+
+        const InputActionKeyboardButtonPairList kShipKeyboardKeyInput =
+        {
+            {
+                InputActionKeyboardMap( kInputActions.StartMoveShipUp,       { nina::KeyboardKey::KB_W, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Pressed } ),
+                InputActionKeyboardMap( kInputActions.StartMoveShipDown ,    { nina::KeyboardKey::KB_S, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Pressed } ),
+                InputActionKeyboardMap( kInputActions.StartMoveShipLeft ,    { nina::KeyboardKey::KB_A, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Pressed } ),
+                InputActionKeyboardMap( kInputActions.StartMoveShipRight ,   { nina::KeyboardKey::KB_D, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Pressed } ),
+
+                InputActionKeyboardMap( kInputActions.StopMoveShipUp,       { nina::KeyboardKey::KB_W, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
+                InputActionKeyboardMap( kInputActions.StopMoveShipDown ,    { nina::KeyboardKey::KB_S, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
+                InputActionKeyboardMap( kInputActions.StopMoveShipLeft ,    { nina::KeyboardKey::KB_A, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
+                InputActionKeyboardMap( kInputActions.StopMoveShipRight ,   { nina::KeyboardKey::KB_D, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
+            }
+        };
+
+        const std::pair<puma::InputAction, puma::MousePositionInput> kMouseInputMap = { kInputActions.MouseAimShip, {puma::InputModifier_IGNORE} };
 
         const struct CollisionIndexes
         {

@@ -45,14 +45,14 @@ namespace ast
 
         Vec2 upperCorner =
         {
-            (gData->kSpatialCageInfo.width / 2.0f) /*+ gData->kRockInfo.radius*/,
-            (gData->kSpatialCageInfo.height / 2.0f) /*+ (gData->kRockInfo.radius)*/
+            (gData->kSpatialCageInfo.width / 2.0f) + gData->kRockInfo.radius,
+            (gData->kSpatialCageInfo.height / 2.0f) + (gData->kRockInfo.radius)
         };
 
         Vec2 lowerCorner =
         {
-            (-gData->kSpatialCageInfo.width / 2.0f) /*- gData->kRockInfo.radius*/,
-            (-gData->kSpatialCageInfo.height / 2.0f) /*- gData->kRockInfo.radius*/
+            (-gData->kSpatialCageInfo.width / 2.0f) - gData->kRockInfo.radius,
+            (-gData->kSpatialCageInfo.height / 2.0f) - gData->kRockInfo.radius
         };
 
 

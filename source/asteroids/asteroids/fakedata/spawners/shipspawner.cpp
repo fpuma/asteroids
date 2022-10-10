@@ -43,6 +43,18 @@ namespace ast
             inputComponent->addInputMap( inputMap.inputAction, inputMap.buttonInput );
         }
 
+        for (const auto& inputMap : gData->kShipMouseButtonInput)
+        {
+            inputComponent->addInputMap( inputMap.inputAction, inputMap.buttonInput );
+        }
+
+        inputComponent->addInputMap( gData->kMouseInputMap.first, gData->kMouseInputMap.second );
+
+        for (const auto& inputMap : gData->kShipKeyboardKeyInput)
+        {
+            inputComponent->addInputMap( inputMap.inputAction, inputMap.keyInput );
+        }
+
         gSystems->getSystem<IInputSystem>()->registerEntity( shipEntity );
 
         //Collision

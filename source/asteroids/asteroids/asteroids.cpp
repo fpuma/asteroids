@@ -142,7 +142,7 @@ namespace ast
         auto cameraComponent = componentProvider->addComponent<ICameraComponent>( m_cameraEntity );
         auto locationComponent = componentProvider->addComponent<ILocationComponent>( m_cameraEntity );
 
-        cameraComponent->setMetersPerPixel( 1.5f );
+        cameraComponent->setMetersPerPixel( 1.0f );
         gEngineApplication->setCameraEntity( m_cameraEntity );
         locationComponent->setPosition( Position() );
 

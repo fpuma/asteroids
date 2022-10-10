@@ -13,6 +13,7 @@
 #include <utils/formatstring.h>
 #include <engine/renderer/irenderqueue.h>
 #include <engine/ecs/components/ilocationcomponent.h>
+#include <engine/renderer/renderhelpers.h>
 
 namespace ast
 {
@@ -28,6 +29,61 @@ namespace ast
         gSystems->unsubscribeSystemUpdate<ShipMovementSystem>( SystemUpdateId::QueueRenderables );
     }
 
+    namespace
+    {
+        void handleKbMovement( IInputComponent* _ic, ShipComponent* _sc )
+        {
+            bool moveByKb = false;
+
+            if (_ic->isActionActive( gData->kInputActions.StartMoveShipUp )) 
+            { 
+                moveByKb = true; 
+                _sc->moveUp( true );
+            }
+            if (_ic->isActionActive( gData->kInputActions.StartMoveShipDown ))  
+            { 
+                moveByKb = true; 
+                _sc->moveDown( true );
+            }
+            if (_ic->isActionActive( gData->kInputActions.StartMoveShipLeft ))  
+            { 
+                moveByKb = true; 
+                _sc->moveLeft( true );
+            }
+            if (_ic->isActionActive( gData->kInputActions.StartMoveShipRight )) 
+            { 
+                moveByKb = true; 
+                _sc->moveRight( true );
+            }
+            //-------------------------------------------------------------------------------
+            if (_ic->isActionActive( gData->kInputActions.StopMoveShipUp )) 
+            { 
+                moveByKb = true; 
+                _sc->moveUp( false );
+            }
+            if (_ic->isActionActive( gData->kInputActions.StopMoveShipDown )) 
+            { 
+                moveByKb = true; 
+                _sc->moveDown( false );
+            }
+            if (_ic->isActionActive( gData->kInputActions.StopMoveShipLeft )) 
+            { 
+                moveByKb = true; 
+                _sc->moveLeft( false );
+            }
+            if (_ic->isActionActive( gData->kInputActions.StopMoveShipRight )) 
+            { 
+                moveByKb = true; 
+                _sc->moveRight( false );
+            }
+
+            if (moveByKb)
+            {
+                _sc->updateDirection();
+            }
+        }
+    }
+
     void ShipMovementSystem::prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
     {
         if (!gEntities->isEntityEnabled( m_shipEntity )) return;
@@ -38,6 +94,7 @@ namespace ast
         ICollisionComponent* collisionComponent = _componentProvider.getComponent<ICollisionComponent>( m_shipEntity );
         leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
 
+        //Process controller input
         if (inputComponent->isActionActive( gData->kInputActions.MoveShip ))
         {
             InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.MoveShip );
@@ -45,12 +102,6 @@ namespace ast
             Vec2 direction = { extraInfo.x, extraInfo.y };
 
             shipComponent->setDirection( direction );
-        }
-
-        Vec2 currentForce = shipComponent->getCurrentForce();
-        if (currentForce.length() > 0.0f)
-        {
-            frame->applyForceToCenter( currentForce );
         }
 
         if (inputComponent->isActionActive( gData->kInputActions.RotateShip ))
@@ -67,6 +118,35 @@ namespace ast
 
                 shipComponent->setDesiredeAngle( newAngle );
             }
+        }
+        //-----------------------------------
+
+        //Process mouse and keyboard input
+
+        handleKbMovement( inputComponent, shipComponent );
+
+        if (inputComponent->isActionActive( gData->kInputActions.MouseAimShip ))
+        {
+            InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.MouseAimShip );
+
+            Position worldMousePos = erh::screenPointToWorld( { static_cast<s32>(extraInfo.x), static_cast<s32>(extraInfo.y) } );
+
+            Vec2 direction = worldMousePos - frame->getPosition();
+
+            //New angle
+            direction = direction.normalize();
+            float newAngle = std::acos( direction.x );
+            newAngle = worldMousePos.y < 0.0f ? 2.0f * PI - newAngle : newAngle;
+
+            shipComponent->setDesiredeAngle( newAngle );
+        }
+
+        //-----------------------------------
+
+        Vec2 currentForce = shipComponent->getCurrentForce();
+        if (currentForce.length() > 0.0f)
+        {
+            frame->applyForceToCenter( currentForce );
         }
 
         //Update angle
@@ -89,7 +169,6 @@ namespace ast
             float angularVelocity = shipComponent->getTurningSpeed() * angularSign;
             frame->setAngularVelocity( angularVelocity );
         }
-
     }
 
     float ShipMovementSystem::processCurrentAngle( float _rawAngle )
