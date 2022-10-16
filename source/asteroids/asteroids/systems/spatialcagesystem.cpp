@@ -95,6 +95,7 @@ namespace ast
 
     void SpatialCageSystem::onUninit()
     {
+        gSystems->unsubscribeSystemUpdate<SpatialCageSystem>( SystemUpdateId::PrePhysics );
         gSystems->unsubscribeSystemUpdate<SpatialCageSystem>( SystemUpdateId::CollisionStarted );
 
         gSystems->getSystem<ICollisionSystem>()->unregisterEntity( m_spatialCage );

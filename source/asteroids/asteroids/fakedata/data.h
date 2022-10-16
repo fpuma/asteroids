@@ -147,6 +147,7 @@ namespace ast
             {kCollisionIndexes.Ship, kCollisionIndexes.SpatialCage},
             {kCollisionIndexes.ShipSkill, kCollisionIndexes.Playfield},
             {kCollisionIndexes.Asteroid, kCollisionIndexes.Playfield},
+            {kCollisionIndexes.Asteroid, kCollisionIndexes.ShipSkill},
         };
 
         const struct ShipInfo

@@ -2,6 +2,7 @@
 #include "rockspawner.h"
 
 #include <asteroids/fakedata/data.h>
+#include <asteroids/components/impactcomponent.h>
 
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
@@ -50,6 +51,8 @@ namespace ast
         renderComponent->addTextureInfo( textureInfo );
         gSystems->getSystem<IRenderSystem>()->registerEntity( rockEntity );
 
+        componentProvider->addComponent<ImpactComponent>( rockEntity );
+
         return rockEntity;
     }
 
@@ -64,6 +67,7 @@ namespace ast
         componentProvider->removeComponent<ILocationComponent>( _entity );
         componentProvider->removeComponent<ICollisionComponent>( _entity );
         componentProvider->removeComponent<IRenderComponent>( _entity );
+        componentProvider->removeComponent<ImpactComponent>( _entity );
 
         entityProvider->disposeEntity( _entity );
     }

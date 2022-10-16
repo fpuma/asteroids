@@ -2,6 +2,7 @@
 #include "bulletspawner.h"
 
 #include <asteroids/fakedata/data.h>
+#include <asteroids/components/impactcomponent.h>
 
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
@@ -52,6 +53,8 @@ namespace ast
         renderComponent->addTextureInfo( textureInfo );
         gSystems->getSystem<IRenderSystem>()->registerEntity( bulletEntity );
 
+        componentProvider->addComponent<ImpactComponent>( bulletEntity );
+
         return bulletEntity;
     }
 
@@ -66,6 +69,7 @@ namespace ast
         componentProvider->removeComponent<ILocationComponent>( _entity );
         componentProvider->removeComponent<ICollisionComponent>( _entity );
         componentProvider->removeComponent<IRenderComponent>( _entity );
+        componentProvider->removeComponent<ImpactComponent>( _entity );
 
         entityProvider->disposeEntity( _entity );
     }

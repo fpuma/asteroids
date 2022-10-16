@@ -4,6 +4,7 @@
 
 #include <asteroids/components/shipcomponent.h>
 #include <asteroids/components/shootcomponent.h>
+#include <asteroids/components/impactcomponent.h>
 #include <asteroids/fakedata/spawners/shipspawner.h>
 #include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
@@ -11,6 +12,7 @@
 #include <asteroids/systems/shootsystem.h>
 #include <asteroids/systems/rockssystem.h>
 #include <asteroids/systems/outofboundsystem.h>
+#include <asteroids/systems/impactsystem.h>
 
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -73,8 +75,10 @@ namespace ast
         sysProvider->registerSystem<ShootSystem>();
         sysProvider->registerSystem<RocksSystem>();
         sysProvider->registerSystem<OutOfBoundSystem>();
+        sysProvider->registerSystem<ImpactSystem>();
         compProvider->registerComponent<ShipComponent>();
         compProvider->registerComponent<ShootComponent>();
+        compProvider->registerComponent<ImpactComponent>();
 
         sysProvider->addSystem<ICollisionSystem>();
         sysProvider->addSystem<IRenderSystem>();
@@ -89,6 +93,7 @@ namespace ast
         sysProvider->addSystem<ShootSystem>();
         sysProvider->addSystem<RocksSystem>();
         sysProvider->addSystem<OutOfBoundSystem>();
+        sysProvider->addSystem<ImpactSystem>();
 
         gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
         gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
@@ -113,6 +118,7 @@ namespace ast
         sysProvider->removeSystem<ShootSystem>();
         sysProvider->removeSystem<RocksSystem>();
         sysProvider->removeSystem<OutOfBoundSystem>();
+        sysProvider->removeSystem<ImpactSystem>();
 
         sysProvider->removeSystem<ICollisionSystem>();
         sysProvider->removeSystem<IRenderSystem>();

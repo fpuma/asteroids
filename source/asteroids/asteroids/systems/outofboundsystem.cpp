@@ -68,6 +68,9 @@ namespace ast
 
     void OutOfBoundSystem::onUninit()
     {
+        gSystems->unsubscribeSystemUpdate<OutOfBoundSystem>( SystemUpdateId::CollisionStopped );
+        gSystems->unsubscribeSystemUpdate<OutOfBoundSystem>( SystemUpdateId::PostPhysics );
+
         unspawnPlayfield();
         m_playfield.invalidate();
         m_framePartId.invalidate();
