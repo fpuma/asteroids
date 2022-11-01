@@ -1,5 +1,6 @@
 #pragma once
 
+#include <asteroids/flow/flowdefinitions.h>
 #include <modules/leo/leodefinitions.h>
 #include <engine/utils/renderdefinitions.h>
 #include <engine/input/inputdefinitions.h>
@@ -186,6 +187,20 @@ namespace ast
             const char* BackgroundTexture = "../assets/asteroids/backgroundSpace_01.1.png";
             const char* RockTexture = "../assets/asteroids/rocks/Asteroids_128x128_001.png";
         }kTexturePaths;
+
+        struct TextureHandles
+        {
+            nina::Texture ShipTexture;
+            nina::Texture BackgroundTexture;
+            nina::Texture RockTexture;
+        }kTextureHandles;
+
+        const struct GameLayers
+        {
+            const LayerId CommonLayer = LayerId( 0 );
+            const LayerId MenuLayer = LayerId( 1 );
+            const LayerId GameplayLayer = LayerId( 2 );
+        }kGameLayers;
     };
 }
 

@@ -5,14 +5,15 @@
 #include <asteroids/components/shipcomponent.h>
 #include <asteroids/components/shootcomponent.h>
 #include <asteroids/components/impactcomponent.h>
-#include <asteroids/fakedata/spawners/shipspawner.h>
-#include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
 #include <asteroids/systems/spatialcagesystem.h>
 #include <asteroids/systems/shootsystem.h>
 #include <asteroids/systems/rockssystem.h>
 #include <asteroids/systems/outofboundsystem.h>
 #include <asteroids/systems/impactsystem.h>
+#include <asteroids/fakedata/data.h>
+
+#include <asteroids/flow/layers/base/layermanager.h>
 
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -22,6 +23,9 @@
 #include <engine/services/iengineapplicationservice.h>
 #include <engine/services/ecsservice.h>
 #include <engine/ecs/systems/icollisionsystem.h>
+
+#include <asteroids/flow/layers/commonlayer.h>
+#include <asteroids/flow/layers/gameplaylayer.h>
 
 using namespace puma;
 
@@ -39,7 +43,7 @@ namespace ast
             TextureInfo textureInfo;
             textureInfo.renderLayer = gData->kRenderLayers.Background;
             textureInfo.renderSize = { 1920.0f,1080.0f };
-            textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
+            textureInfo.texture = gData->kTextureHandles.BackgroundTexture;
 
             renderComponent->addTextureInfo( textureInfo );
 
@@ -61,6 +65,8 @@ namespace ast
     {
         m_data = std::make_unique<ast::Data>();
         puma::DefaultInstance<ast::Data>::setInstance( m_data.get() );
+        puma::DefaultServices::getInstance()->registerClass<LayerService>();
+        puma::DefaultServices::getInstance()->add<LayerService>();
 
         gEngineApplication->setWindowTitle( "Asteroids" );
         gEngineApplication->setWindowSize( 1920, 1080 );
@@ -80,49 +86,21 @@ namespace ast
         compProvider->registerComponent<ShootComponent>();
         compProvider->registerComponent<ImpactComponent>();
 
-        sysProvider->addSystem<ICollisionSystem>();
-        sysProvider->addSystem<IRenderSystem>();
-        sysProvider->addSystem<IInputSystem>();
-
-        //Inits
-        initCamera();
-        initPhysics();
-
-        sysProvider->addSystem<ShipMovementSystem>();
-        sysProvider->addSystem<SpatialCageSystem>();
-        sysProvider->addSystem<ShootSystem>();
-        sysProvider->addSystem<RocksSystem>();
-        sysProvider->addSystem<OutOfBoundSystem>();
-        sysProvider->addSystem<ImpactSystem>();
-
-        gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
-        gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
-        gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
-
-        //Spawn
-        m_shipEntity = ShipSpawner::spawnShip( Position() );
-
+        gData->kTextureHandles.BackgroundTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
+        gData->kTextureHandles.ShipTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
+        gData->kTextureHandles.RockTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
+        
+        gLayerManager->addLayer( std::make_unique<CommonLayer>() );
+        gLayerManager->addLayer( std::make_unique<GameplayLayer>() );
+        
         m_backgroundEntity = spawnBackground();
     }
 
     void Asteroids::uninit()
     {
         unspawnBackground( m_backgroundEntity );
-        uninitCamera();
-        ShipSpawner::unspawnShip( m_shipEntity );
-
-        auto sysProvider = gSystems;
-
-        sysProvider->removeSystem<ShipMovementSystem>();
-        sysProvider->removeSystem<SpatialCageSystem>();
-        sysProvider->removeSystem<ShootSystem>();
-        sysProvider->removeSystem<RocksSystem>();
-        sysProvider->removeSystem<OutOfBoundSystem>();
-        sysProvider->removeSystem<ImpactSystem>();
-
-        sysProvider->removeSystem<ICollisionSystem>();
-        sysProvider->removeSystem<IRenderSystem>();
-        sysProvider->removeSystem<IInputSystem>();
+        
+        gLayerManager->removeLayer( gData->kGameLayers.CommonLayer );
     }
 
     void Asteroids::update( float _deltaTime )
@@ -130,38 +108,6 @@ namespace ast
 
     }
 
-    void Asteroids::initPhysics()
-    {
-        ICollisionSystem* collisionSystem = gSystems->getSystem<ICollisionSystem>();
-        collisionSystem->setGravity( { 0.0f, 0.0f } );
-        //collisionSystem->enableDebugDraw();
-        collisionSystem->setCollisionCompatibility( gData->kCollisionCompatibility );
-    }
 
-    void Asteroids::initCamera()
-    {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
 
-        m_cameraEntity = entityProvider->requestEntity();
-
-        auto cameraComponent = componentProvider->addComponent<ICameraComponent>( m_cameraEntity );
-        auto locationComponent = componentProvider->addComponent<ILocationComponent>( m_cameraEntity );
-
-        cameraComponent->setMetersPerPixel( 1.0f );
-        gEngineApplication->setCameraEntity( m_cameraEntity );
-        locationComponent->setPosition( Position() );
-
-    }
-
-    void Asteroids::uninitCamera()
-    {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
-
-        componentProvider->removeComponent<ICameraComponent>( m_cameraEntity );
-        componentProvider->removeComponent<ILocationComponent>( m_cameraEntity );
-
-        entityProvider->disposeEntity( m_cameraEntity );
-    }
 }

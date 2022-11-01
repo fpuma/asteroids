@@ -44,7 +44,7 @@ namespace ast
         auto renderComponent = componentProvider->addComponent<IRenderComponent>( bulletEntity );
 
         TextureInfo textureInfo;
-        textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
+        textureInfo.texture = gData->kTextureHandles.ShipTexture;
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
         textureInfo.renderSize = { gData->kBulletInfo.radius*2, gData->kBulletInfo.radius*2 };
         //textureInfo.textureSample = { {0.6883f, 0.6048f}, {0.355f, 0.366f} };

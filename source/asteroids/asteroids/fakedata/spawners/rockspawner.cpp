@@ -44,7 +44,7 @@ namespace ast
         auto renderComponent = componentProvider->addComponent<IRenderComponent>( rockEntity );
 
         TextureInfo textureInfo;
-        textureInfo.texture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
+        textureInfo.texture = gData->kTextureHandles.RockTexture;
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
         textureInfo.renderSize = { gData->kRockInfo.radius*2, gData->kRockInfo.radius*2 };
 

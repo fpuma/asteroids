@@ -3,10 +3,20 @@
 #include <modules/pina/entity.h>
 #include <engine/igame.h>
 #include <asteroids/fakedata/data.h>
+#include <utils/statemachine/statemachine.h>
 
 using namespace puma;
 namespace ast
 {
+
+
+    class AsteroidsState : public IState<StateMachineInfo>
+    {
+    public:
+
+        AsteroidsState( StateId _id ) : IState( _id ) {}
+    };
+
     class Asteroids : public IGame
     {
     public:
@@ -17,12 +27,6 @@ namespace ast
 
     private:
 
-        void initCamera();
-        void uninitCamera();
-        void initPhysics();
-
-        Entity m_cameraEntity;
-        Entity m_shipEntity;
         Entity m_backgroundEntity;
 
         std::unique_ptr<Data> m_data;
