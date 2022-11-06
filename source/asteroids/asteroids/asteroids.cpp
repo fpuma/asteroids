@@ -89,7 +89,7 @@ namespace ast
         gData->kTextureHandles.BackgroundTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
         gData->kTextureHandles.ShipTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
         gData->kTextureHandles.RockTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
-        
+
         gLayerManager->addLayer( std::make_unique<CommonLayer>() );
         gLayerManager->addLayer( std::make_unique<GameplayLayer>() );
         
@@ -101,6 +101,10 @@ namespace ast
         unspawnBackground( m_backgroundEntity );
         
         gLayerManager->removeLayer( gData->kGameLayers.CommonLayer );
+
+        gEngineApplication->getTextureManager()->unloadTexture( gData->kTextureHandles.BackgroundTexture );
+        gEngineApplication->getTextureManager()->unloadTexture( gData->kTextureHandles.ShipTexture );
+        gEngineApplication->getTextureManager()->unloadTexture( gData->kTextureHandles.RockTexture );
     }
 
     void Asteroids::update( float _deltaTime )
