@@ -3,6 +3,7 @@
 #include <engine/services/base/iservice.h>
 #include <asteroids/flow/flowdefinitions.h>
 #include <engine/services/base/iservice.h>
+#include <utils/containers/uniquerealizationcontainer.h>
 
 using namespace puma;
 
@@ -20,11 +21,33 @@ namespace ast
         void addLayer( std::unique_ptr<ILayer>&& _layerPtr );
         void removeLayer( LayerId _id );
 
+        const ILayer* getLayer( LayerId _id ) const { return getLayerInternal( _id ); }
+        ILayer* getLayer( LayerId _id ) { return getLayerInternal( _id ); }
+
+        template<class T>
+        const T* getLayer( LayerId _id ) const { return static_cast<const T*>(getLayer( _id )); }
+
+        template<class T>
+        T* getLayer( LayerId _id ) { return static_cast<T*>(getLayer( _id )); }
+
         void uninit();
 
     private:
 
         void removeChildren( ILayer* _layer );
+
+        ILayer* getLayerInternal( LayerId _id ) const
+        {
+            assert( m_layers.contains( _id ) ); //There is no Layer with that Id
+
+            ILayer* result = nullptr;
+
+            if (m_layers.contains( _id ))
+            {
+                result = m_layers.at( _id ).get();
+            }
+            return result;
+        }
 
         struct LayerIdHash
         {

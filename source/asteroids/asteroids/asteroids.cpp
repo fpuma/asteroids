@@ -5,6 +5,8 @@
 #include <asteroids/components/shipcomponent.h>
 #include <asteroids/components/shootcomponent.h>
 #include <asteroids/components/impactcomponent.h>
+#include <asteroids/flow/states/menustate.h>
+#include <asteroids/flow/states/gameplaystate.h>
 #include <asteroids/systems/shipmovementsystem.h>
 #include <asteroids/systems/spatialcagesystem.h>
 #include <asteroids/systems/shootsystem.h>
@@ -25,7 +27,6 @@
 #include <engine/ecs/systems/icollisionsystem.h>
 
 #include <asteroids/flow/layers/commonlayer.h>
-#include <asteroids/flow/layers/gameplaylayer.h>
 
 using namespace puma;
 
@@ -43,7 +44,7 @@ namespace ast
             TextureInfo textureInfo;
             textureInfo.renderLayer = gData->kRenderLayers.Background;
             textureInfo.renderSize = { 1920.0f,1080.0f };
-            textureInfo.texture = gData->kTextureHandles.BackgroundTexture;
+            textureInfo.texture = gData->kResourcesHandles.BackgroundTexture;
 
             renderComponent->addTextureInfo( textureInfo );
 
@@ -86,13 +87,30 @@ namespace ast
         compProvider->registerComponent<ShootComponent>();
         compProvider->registerComponent<ImpactComponent>();
 
-        gData->kTextureHandles.BackgroundTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.BackgroundTexture );
-        gData->kTextureHandles.ShipTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.ShipSprite );
-        gData->kTextureHandles.RockTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kTexturePaths.RockTexture );
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Load all resources now. TODO: Need to improve this once I implement a resource manager that does not clash with the renderer being used in the render loop
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        gData->kResourcesHandles.BackgroundTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kResourcesPaths.BackgroundTexture );
+        gData->kResourcesHandles.ShipTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kResourcesPaths.ShipSprite );
+        gData->kResourcesHandles.RockTexture = gEngineApplication->getTextureManager()->loadTexture( gData->kResourcesPaths.RockTexture );
+        gData->kResourcesHandles.Font = gEngineApplication->getTextureManager()->loadFont( gData->kResourcesPaths.FontPath );
+
+        nina::TexturizedTextInfo textInfo;
+        textInfo.color = Color::White();
+        textInfo.fontPath = gData->kResourcesPaths.FontPath;
+        textInfo.text = "Press A to play";
+
+        gData->kResourcesHandles.PressAnyButtonTexture = gEngineApplication->getTextureManager()->loadText( textInfo );
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         gLayerManager->addLayer( std::make_unique<CommonLayer>() );
-        gLayerManager->addLayer( std::make_unique<GameplayLayer>() );
         
+        m_stateMachineInfo.currentStateId = gData->kGameStates.MenuState;
+
+        m_stateMachine.addState<MenuState>();
+        m_stateMachine.addState<GameplayState>();
+        m_stateMachine.start( m_stateMachineInfo );
+
         m_backgroundEntity = spawnBackground();
     }
 
@@ -100,16 +118,22 @@ namespace ast
     {
         unspawnBackground( m_backgroundEntity );
         
+        m_stateMachine.uninit( m_stateMachineInfo );
+
         gLayerManager->removeLayer( gData->kGameLayers.CommonLayer );
 
-        gEngineApplication->getTextureManager()->unloadTexture( gData->kTextureHandles.BackgroundTexture );
-        gEngineApplication->getTextureManager()->unloadTexture( gData->kTextureHandles.ShipTexture );
-        gEngineApplication->getTextureManager()->unloadTexture( gData->kTextureHandles.RockTexture );
+
+        gEngineApplication->getTextureManager()->unloadFont( gData->kResourcesHandles.Font );
+        gEngineApplication->getTextureManager()->unloadText( gData->kResourcesHandles.PressAnyButtonTexture );
+        gEngineApplication->getTextureManager()->unloadTexture( gData->kResourcesHandles.BackgroundTexture );
+        gEngineApplication->getTextureManager()->unloadTexture( gData->kResourcesHandles.ShipTexture );
+        gEngineApplication->getTextureManager()->unloadTexture( gData->kResourcesHandles.RockTexture );
+
     }
 
     void Asteroids::update( float _deltaTime )
     {
-
+        m_stateMachine.update( m_stateMachineInfo );
     }
 
 

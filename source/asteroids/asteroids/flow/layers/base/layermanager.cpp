@@ -53,6 +53,13 @@ namespace ast
 
         removeChildren( layer );
         
+        assert( m_layers.contains( layer->getParentId() ) || m_rootLayers.contains(_id) ); // Removing a layer with a non existent parent?
+
+        if (m_layers.contains( layer->getParentId() ))
+        {
+            m_layers.at( layer->getParentId() )->removeChild( _id );
+        }
+
         layer->onUninit();
 
         m_layers.erase( _id );

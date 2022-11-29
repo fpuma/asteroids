@@ -5,6 +5,8 @@
 #include <engine/utils/renderdefinitions.h>
 #include <engine/input/inputdefinitions.h>
 #include <modules/nina/ninadefinitions.h>
+
+#include <utils/statemachine/istate.h>
 #include <array>
 
 using namespace puma;
@@ -56,10 +58,10 @@ namespace ast
         puma::KeyboardInput keyInput;
     };
 
-    using InputActionControllerJoystickPairList = std::array<InputActionJoystickMap, 2>;
-    using InputActionControllerButtonPairList = std::array<InputActionControllerButtonMap, 2>;
-    using InputActionMouseButtonPairList = std::array<InputActionMouseButtonMap, 2>;
-    using InputActionKeyboardButtonPairList = std::array<InputActionKeyboardMap, 8>;
+    using InputActionControllerJoystickPairList = std::vector<InputActionJoystickMap>;
+    using InputActionControllerButtonPairList = std::vector<InputActionControllerButtonMap>;
+    using InputActionMouseButtonPairList = std::vector<InputActionMouseButtonMap>;
+    using InputActionKeyboardButtonPairList = std::vector<InputActionKeyboardMap>;
 
     class Data
     {
@@ -89,6 +91,8 @@ namespace ast
             const puma::InputAction StopMoveShipDown = puma::InputAction( 10 );
             const puma::InputAction StopMoveShipLeft = puma::InputAction( 11 );
             const puma::InputAction StopMoveShipRight = puma::InputAction( 12 );
+
+            const puma::InputAction MenuAButton = puma::InputAction( 13 );
 
         } kInputActions;
 
@@ -129,6 +133,13 @@ namespace ast
                 InputActionKeyboardMap( kInputActions.StopMoveShipDown ,    { nina::KeyboardKey::KB_S, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
                 InputActionKeyboardMap( kInputActions.StopMoveShipLeft ,    { nina::KeyboardKey::KB_A, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
                 InputActionKeyboardMap( kInputActions.StopMoveShipRight ,   { nina::KeyboardKey::KB_D, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Released } ),
+            }
+        };
+
+        const InputActionKeyboardButtonPairList kMenuKeyboardKeyInput =
+        {
+            {
+                InputActionKeyboardMap( kInputActions.MenuAButton,       { nina::KeyboardKey::KB_A, puma::InputModifier::InputModifier_IGNORE, nina::InputButtonEvent::Pressed } ),
             }
         };
 
@@ -181,19 +192,23 @@ namespace ast
             const float spawnRate = 1.0f;
         }kRockInfo;
 
-        const struct TexturePaths
+        const struct ResourcesPaths
         {
             const char* ShipSprite = "../assets/asteroids/FighterPlaneV2.png";
             const char* BackgroundTexture = "../assets/asteroids/backgroundSpace_01.1.png";
             const char* RockTexture = "../assets/asteroids/rocks/Asteroids_128x128_001.png";
-        }kTexturePaths;
+            const char* FontPath = "../assets/asteroids/Blitztark_v0-Regular.ttf";
+        }kResourcesPaths;
 
-        struct TextureHandles
+        struct ResourcesHandles
         {
             nina::Texture ShipTexture;
             nina::Texture BackgroundTexture;
             nina::Texture RockTexture;
-        }kTextureHandles;
+            nina::Texture PressAnyButtonTexture;
+
+            nina::FontHandle Font;
+        }kResourcesHandles;
 
         const struct GameLayers
         {
@@ -201,6 +216,12 @@ namespace ast
             const LayerId MenuLayer = LayerId( 1 );
             const LayerId GameplayLayer = LayerId( 2 );
         }kGameLayers;
+
+        const struct GameStates
+        {
+            const StateId MenuState = StateId( 0 );
+            const StateId GameplayState = StateId( 1 );
+        }kGameStates;
     };
 }
 

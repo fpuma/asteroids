@@ -76,7 +76,7 @@ namespace ast
         auto renderComponent = componentProvider->addComponent<IRenderComponent>( shipEntity );
 
         TextureInfo textureInfo;
-        textureInfo.texture = gData->kTextureHandles.ShipTexture;
+        textureInfo.texture = gData->kResourcesHandles.ShipTexture;
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
         textureInfo.renderSize = { gData->kShipInfo.radius*2, gData->kShipInfo.radius*2 };
         textureInfo.offset = { Position(), -PI / 2 };
