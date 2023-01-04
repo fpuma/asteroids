@@ -4,6 +4,7 @@
 
 #include <asteroids/fakedata/data.h>
 #include <asteroids/components/shipcomponent.h>
+#include <asteroids/components/impactcomponent.h>
 
 #include <engine/ecs/components/iinputcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
@@ -181,9 +182,10 @@ namespace ast
 
     void ShipMovementSystem::queueRenderables( IRenderQueue& _renderQueue )
     {
-        ICollisionComponent* collisionComponent = gComponents->getComponent<ICollisionComponent>( m_shipEntity );
+        if (!gEntities->isEntityEnabled( m_shipEntity )) return;
+        //ICollisionComponent* collisionComponent = gComponents->getComponent<ICollisionComponent>( m_shipEntity );
         ILocationComponent* locationComponent = gComponents->getComponent<ILocationComponent>( m_shipEntity );
-        leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
+        //leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
         //ShipComponent* shipComponent = gComponents->getComponent<ShipComponent>( m_shipEntity );
 
         //_renderQueue.addDebugRenderableText( formatString( "AVel: %.4f", frame->getAngularVelocity() ),Color::White(), locationComponent->getPosition() );
@@ -191,6 +193,9 @@ namespace ast
         //_renderQueue.addDebugRenderableText( formatString( "PAng: %.4f", processCurrentAngle( frame->getAngle() ) ), Color::White(), locationComponent->getPosition() + Position( 0.0f, 25.0f ) );
         //_renderQueue.addDebugRenderableText( formatString( "DAng: %.4f", shipComponent->getDesiredAngle() ), Color::White(), locationComponent->getPosition() + Position(0.0f, 37.5f ));
 
-        _renderQueue.addDebugRenderableText( formatString( "Vel: %.4f", frame->getLinearVelocity().length() ), Color::White(), locationComponent->getPosition() );
+        //_renderQueue.addDebugRenderableText( formatString( "Vel: %.4f", frame->getLinearVelocity().length() ), Color::White(), locationComponent->getPosition() );
+
+        ImpactComponent* impactComponent = gComponents->getComponent<ImpactComponent>( m_shipEntity );
+        _renderQueue.addDebugRenderableText( formatString( "HP: %d", impactComponent->getCurrentHp() ), Color::White(), locationComponent->getPosition() );
     }
 }

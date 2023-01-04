@@ -3,6 +3,7 @@
 
 #include <asteroids/components/shipcomponent.h>
 #include <asteroids/components/shootcomponent.h>
+#include <asteroids/components/impactcomponent.h>
 #include <asteroids/fakedata/data.h>
 #include <asteroids/systems/shipmovementsystem.h>
 #include <asteroids/systems/shootsystem.h>
@@ -95,6 +96,11 @@ namespace ast
         gSystems->getSystem<ShipMovementSystem>()->setShipEntity( shipEntity );
         gSystems->getSystem<ShootSystem>()->registerEntity( shipEntity );
 
+        auto impactComponent = componentProvider->addComponent<ImpactComponent>( shipEntity );
+        impactComponent->setCurrentHp( 10 );
+        impactComponent->setDefaultHp( 10 );
+        impactComponent->setDamage( 99 );
+
         return shipEntity;
     }
 
@@ -113,6 +119,7 @@ namespace ast
         componentProvider->removeComponent<IRenderComponent>( _entity );
         componentProvider->removeComponent<ShootComponent>( _entity );
         componentProvider->removeComponent<ShipComponent>( _entity );
+        componentProvider->removeComponent<ImpactComponent>( _entity );
 
         gSystems->getSystem<IInputSystem>()->unregisterEntity( _entity );
 

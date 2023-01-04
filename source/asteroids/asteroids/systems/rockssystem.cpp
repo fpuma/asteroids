@@ -3,11 +3,13 @@
 
 #include <asteroids/fakedata/spawners/rockspawner.h>
 #include <asteroids/fakedata/data.h>
+#include <asteroids/components/impactcomponent.h>
 #include <asteroids/components/shootcomponent.h>
 #include <engine/services/ecsservice.h>
 #include <engine/ecs/components/iinputcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
+#include <engine/renderer/irenderqueue.h>
 #include <engine/services/iloggerservice.h>
 #include <utils/geometry/geometryhelpers.h>
 
@@ -34,6 +36,7 @@ namespace ast
     void RocksSystem::onInit()
     {
         gSystems->subscribeSystemUpdate<RocksSystem>( SystemUpdateId::PrePhysics );
+        gSystems->subscribeSystemUpdate<RocksSystem>( SystemUpdateId::QueueRenderables );
 
         for (Entity& rock : m_rocks)
         {
@@ -73,6 +76,7 @@ namespace ast
     void RocksSystem::onUninit()
     {
         gSystems->unsubscribeSystemUpdate<RocksSystem>( SystemUpdateId::PrePhysics );
+        gSystems->unsubscribeSystemUpdate<RocksSystem>( SystemUpdateId::QueueRenderables );
 
         for (Entity& rock : m_rocks)
         {
@@ -109,8 +113,24 @@ namespace ast
                 Vec2 dir = destination - origin;
                 dir = dir.normalize();
                 frame->setLinearVelocity( dir * 100.0f );
+
+                ImpactComponent* impactComponent = gComponents->getComponent<ImpactComponent>( rockEntity );
+                impactComponent->setCurrentHp( 10 );
             }
         }
      
+    }
+
+    void RocksSystem::queueRenderables( IRenderQueue& _renderQueue )
+    {
+        for (const Entity& ntt : m_rocks)
+        {
+            if (gEntities->isEntityEnabled( ntt ))
+            {
+                ImpactComponent* impactComponent = gComponents->getComponent<ImpactComponent>( ntt );
+                ILocationComponent* locationComponent = gComponents->getComponent<ILocationComponent>( ntt );
+                _renderQueue.addDebugRenderableText( formatString( "HP: %d", impactComponent->getCurrentHp() ), Color::White(), locationComponent->getPosition() );
+            }
+        }
     }
 }

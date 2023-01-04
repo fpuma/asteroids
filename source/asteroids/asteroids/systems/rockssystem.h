@@ -18,7 +18,7 @@ namespace ast
         void onUninit() override;
 
         void prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider ) override;
-
+        void queueRenderables( IRenderQueue& _renderQueue ) override;
 
     private:
 

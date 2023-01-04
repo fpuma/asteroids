@@ -51,7 +51,8 @@ namespace ast
         renderComponent->addTextureInfo( textureInfo );
         gSystems->getSystem<IRenderSystem>()->registerEntity( rockEntity );
 
-        componentProvider->addComponent<ImpactComponent>( rockEntity );
+        auto impactComponent = componentProvider->addComponent<ImpactComponent>( rockEntity );
+        impactComponent->setCurrentHp( 10 );
 
         return rockEntity;
     }
