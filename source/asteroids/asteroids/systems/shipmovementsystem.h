@@ -18,6 +18,8 @@ namespace ast
         void queueRenderables( IRenderQueue& _renderQueue ) override;
         void setShipEntity( Entity _entity ) { m_shipEntity = _entity; }
 
+        Entity getShipEntity() const { return m_shipEntity; }
+
     private:
 
         float processCurrentAngle( float _rawAngle );

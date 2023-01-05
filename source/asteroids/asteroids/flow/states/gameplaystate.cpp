@@ -4,6 +4,9 @@
 
 #include <asteroids/flow/layers/base/layermanager.h>
 #include <asteroids/flow/layers/gameplaylayer.h>
+#include <asteroids/systems/shipmovementsystem.h>
+#include <engine/services/ecsservice.h>
+#include <engine/ecs/systems/icollisionsystem.h>
 
 #include <asteroids/fakedata/data.h>
 
@@ -24,6 +27,13 @@ namespace ast
 
     void GameplayState::update( StateMachineInfo& _info )
     {
+        ShipMovementSystem* shipSystem = gSystems->getSystem<ShipMovementSystem>();
+        Entity shipEntity = shipSystem->getShipEntity();
+
+        if (!gEntities->isEntityEnabled( shipEntity ))
+        {
+            _info.currentStateId = gData->kGameStates.MenuState;
+        }
 
     }
 
