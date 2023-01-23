@@ -137,7 +137,7 @@ namespace ast
             //New angle
             direction = direction.normalize();
             float newAngle = std::acos( direction.x );
-            newAngle = worldMousePos.y < 0.0f ? 2.0f * PI - newAngle : newAngle;
+            newAngle = worldMousePos.y < frame->getPosition().y ? 2.0f * PI - newAngle : newAngle;
 
             shipComponent->setDesiredeAngle( newAngle );
         }
