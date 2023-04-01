@@ -9,6 +9,7 @@
 #include <engine/ecs/components/iinputcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <utils/geometry/geometryhelpers.h>
 #include <engine/services/iloggerservice.h>
 #include <utils/formatstring.h>
@@ -85,14 +86,14 @@ namespace ast
         }
     }
 
-    void ShipMovementSystem::prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
+    void ShipMovementSystem::prePhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider )
     {
         if (!gEntities->isEntityEnabled( m_shipEntity )) return;
 
-        IInputComponent* inputComponent = _componentProvider.getComponent<IInputComponent>( m_shipEntity );
-        ShipComponent* shipComponent = _componentProvider.getComponent<ShipComponent>( m_shipEntity );
+        IInputComponent* inputComponent = _componentProvider.get<IInputComponent>( m_shipEntity );
+        ShipComponent* shipComponent = _componentProvider.get<ShipComponent>( m_shipEntity );
 
-        ICollisionComponent* collisionComponent = _componentProvider.getComponent<ICollisionComponent>( m_shipEntity );
+        ICollisionComponent* collisionComponent = _componentProvider.get<ICollisionComponent>( m_shipEntity );
         leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
 
         //Process controller input
@@ -183,10 +184,10 @@ namespace ast
     void ShipMovementSystem::queueRenderables( IRenderQueue& _renderQueue )
     {
         if (!gEntities->isEntityEnabled( m_shipEntity )) return;
-        //ICollisionComponent* collisionComponent = gComponents->getComponent<ICollisionComponent>( m_shipEntity );
-        ILocationComponent* locationComponent = gComponents->getComponent<ILocationComponent>( m_shipEntity );
+        //ICollisionComponent* collisionComponent = gComponents->get<ICollisionComponent>( m_shipEntity );
+        ILocationComponent* locationComponent = gComponents->get<ILocationComponent>( m_shipEntity );
         //leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
-        //ShipComponent* shipComponent = gComponents->getComponent<ShipComponent>( m_shipEntity );
+        //ShipComponent* shipComponent = gComponents->get<ShipComponent>( m_shipEntity );
 
         //_renderQueue.addDebugRenderableText( formatString( "AVel: %.4f", frame->getAngularVelocity() ),Color::White(), locationComponent->getPosition() );
         //_renderQueue.addDebugRenderableText( formatString( "RAng: %.4f", frame->getAngle() ), Color::White(), locationComponent->getPosition() + Position( 0.0f, 12.5f ) );
@@ -195,7 +196,7 @@ namespace ast
 
         //_renderQueue.addDebugRenderableText( formatString( "Vel: %.4f", frame->getLinearVelocity().length() ), Color::White(), locationComponent->getPosition() );
 
-        ImpactComponent* impactComponent = gComponents->getComponent<ImpactComponent>( m_shipEntity );
+        ImpactComponent* impactComponent = gComponents->get<ImpactComponent>( m_shipEntity );
         _renderQueue.addDebugRenderableText( formatString( "HP: %d", impactComponent->getCurrentHp() ), Color::White(), locationComponent->getPosition() );
     }
 }

@@ -3,6 +3,7 @@
 
 #include <asteroids/fakedata/data.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <engine/ecs/components/icollisioncomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/ecs/systems/icollisionsystem.h>
@@ -18,10 +19,10 @@ namespace ast
 
         m_spatialCage = gEntities->requestEntity();
 
-        auto collisionComponent = gComponents->addComponent<ICollisionComponent>( m_spatialCage );
-        gComponents->addComponent<ILocationComponent>( m_spatialCage );
+        auto collisionComponent = gComponents->add<ICollisionComponent>( m_spatialCage );
+        gComponents->add<ILocationComponent>( m_spatialCage );
 
-        gSystems->getSystem<ICollisionSystem>()->registerEntity( m_spatialCage, {}, leo::FrameType::Static );
+        collisionComponent->init( leo::FrameType::Static, {} );
 
         //*
         leo::TriggerInfo triggerInfo;
@@ -98,16 +99,14 @@ namespace ast
         gSystems->unsubscribeSystemUpdate<SpatialCageSystem>( SystemUpdateId::PrePhysics );
         gSystems->unsubscribeSystemUpdate<SpatialCageSystem>( SystemUpdateId::CollisionStarted );
 
-        gSystems->getSystem<ICollisionSystem>()->unregisterEntity( m_spatialCage );
-
-        gComponents->removeComponent<ICollisionComponent>( m_spatialCage );
-        gComponents->removeComponent<ILocationComponent>( m_spatialCage );
+        gComponents->remove<ICollisionComponent>( m_spatialCage );
+        gComponents->remove<ILocationComponent>( m_spatialCage );
 
         gEntities->disposeEntity( m_spatialCage );
 
     }
 
-    void SpatialCageSystem::prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
+    void SpatialCageSystem::prePhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider )
     {
         if (m_pendingTeleport.entity.isValid())
         {
@@ -130,7 +129,7 @@ namespace ast
 
     void SpatialCageSystem::setPendingTeleport( leo::FramePartID _cageFramePart, leo::FramePartID _entityFramePart )
     {
-        Entity entity = getEntityFromFramePart( _entityFramePart );
+        pina::Entity entity = getEntityFromFramePart( _entityFramePart );
         Position pos = getEntityPosition( entity );
         if (_cageFramePart == m_top)
         {
@@ -159,24 +158,24 @@ namespace ast
         m_pendingTeleport.entity = entity;
     }
 
-    void SpatialCageSystem::teleportEntity( Entity _entity, Position _pos )
+    void SpatialCageSystem::teleportEntity( pina::Entity _entity, Position _pos )
     {
-        ICollisionComponent* collisionComponent = gComponents->getComponent<ICollisionComponent>( _entity );
+        ICollisionComponent* collisionComponent = gComponents->get<ICollisionComponent>( _entity );
 
         leo::IDynamicFrame* dynFrame = collisionComponent->getDynamicFrame();
         dynFrame->setPosition( { _pos.x, _pos.y } );
     }
 
-    Position SpatialCageSystem::getEntityPosition( Entity _entity ) const
+    Position SpatialCageSystem::getEntityPosition( pina::Entity _entity ) const
     {
-        ILocationComponent* locationComponent = gComponents->getComponent<ILocationComponent>( _entity );
+        ILocationComponent* locationComponent = gComponents->get<ILocationComponent>( _entity );
         return locationComponent->getPosition();
     }
 
-    Entity SpatialCageSystem::getEntityFromFramePart( leo::FramePartID _framePartId ) const
+    pina::Entity SpatialCageSystem::getEntityFromFramePart( leo::FramePartID _framePartId ) const
     {
         leo::UserCollisionData userData = gSystems->getSystem<ICollisionSystem>()->getUserCollisionData( _framePartId );
-        return Entity( (size_t)userData );
+        return pina::Entity( (size_t)userData );
     }
 
     bool SpatialCageSystem::isCage( leo::FramePartID _framePartId ) const

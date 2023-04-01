@@ -13,6 +13,7 @@
 #include <engine/ecs/components/irendercomponent.h>
 #include <engine/ecs/components/iinputcomponent.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <engine/ecs/systems/icollisionsystem.h>
 #include <engine/ecs/systems/iinputsystem.h>
 #include <engine/ecs/systems/irendersystem.h>
@@ -22,18 +23,18 @@
 
 namespace ast
 {
-    Entity ShipSpawner::spawnShip( Position _pos )
+    pina::Entity ShipSpawner::spawnShip( Position _pos )
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        Entity shipEntity = entityProvider->requestEntity();
+        pina::Entity shipEntity = entityProvider->requestEntity();
 
         //Location
-        componentProvider->addComponent<ILocationComponent>( shipEntity );
+        componentProvider->add<ILocationComponent>( shipEntity );
 
         //Input
-        auto inputComponent = componentProvider->addComponent<IInputComponent>( shipEntity );
+        auto inputComponent = componentProvider->add<IInputComponent>( shipEntity );
         for (const auto& inputMap : gData->kShipControllerJoystickInput)
         {
             inputComponent->addInputMap( inputMap.inputAction, inputMap.joystickInput );
@@ -56,14 +57,12 @@ namespace ast
             inputComponent->addInputMap( inputMap.inputAction, inputMap.keyInput );
         }
 
-        gSystems->getSystem<IInputSystem>()->registerEntity( shipEntity );
-
         //Collision
-        auto collisionComponent = componentProvider->addComponent<ICollisionComponent>( shipEntity );
+        auto collisionComponent = componentProvider->add<ICollisionComponent>( shipEntity );
 
         leo::FrameInfo frameInfo;
         frameInfo.linearDamping = 0.1f;
-        gSystems->getSystem<ICollisionSystem>()->registerEntity( shipEntity, frameInfo, leo::FrameType::Dynamic );
+        collisionComponent->init( leo::FrameType::Dynamic, frameInfo );
 
         leo::BodyInfo bodyInfo;
         Circle circle = { Vec2(), gData->kShipInfo.radius };
@@ -74,7 +73,7 @@ namespace ast
         collisionComponent->addBody( bodyInfo );
 
         //Render
-        auto renderComponent = componentProvider->addComponent<IRenderComponent>( shipEntity );
+        auto renderComponent = componentProvider->add<IRenderComponent>( shipEntity );
 
         TextureInfo textureInfo;
         textureInfo.texture = gData->kResourcesHandles.ShipTexture;
@@ -85,18 +84,16 @@ namespace ast
         textureInfo.textureSample = { {0.6883f, 0.9400f}, {0.355f, 0.699f} };
 
         renderComponent->addTextureInfo( textureInfo );
-        gSystems->getSystem<IRenderSystem>()->registerEntity( shipEntity );
 
         //Ship
-        componentProvider->addComponent<ShipComponent>( shipEntity );
-        auto shootComponent = componentProvider->addComponent<ShootComponent>( shipEntity );
+        componentProvider->add<ShipComponent>( shipEntity );
+        auto shootComponent = componentProvider->add<ShootComponent>( shipEntity );
         shootComponent->setBulletSpeed( gData->kBulletInfo.speed );
         shootComponent->setFireRate( gData->kBulletInfo.fireRate );
 
         gSystems->getSystem<ShipMovementSystem>()->setShipEntity( shipEntity );
-        gSystems->getSystem<ShootSystem>()->registerEntity( shipEntity );
 
-        auto impactComponent = componentProvider->addComponent<ImpactComponent>( shipEntity );
+        auto impactComponent = componentProvider->add<ImpactComponent>( shipEntity );
         impactComponent->setCurrentHp( 10 );
         impactComponent->setDefaultHp( 10 );
         impactComponent->setDamage( 99 );
@@ -104,24 +101,18 @@ namespace ast
         return shipEntity;
     }
 
-    void ShipSpawner::unspawnShip( Entity _entity )
+    void ShipSpawner::unspawnShip( pina::Entity _entity )
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        gSystems->getSystem<ICollisionSystem>()->unregisterEntity( _entity );
-        gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
-        gSystems->getSystem<ShootSystem>()->unregisterEntity( _entity );
-
-        componentProvider->removeComponent<ILocationComponent>( _entity );
-        componentProvider->removeComponent<IInputComponent>( _entity );
-        componentProvider->removeComponent<ICollisionComponent>( _entity );
-        componentProvider->removeComponent<IRenderComponent>( _entity );
-        componentProvider->removeComponent<ShootComponent>( _entity );
-        componentProvider->removeComponent<ShipComponent>( _entity );
-        componentProvider->removeComponent<ImpactComponent>( _entity );
-
-        gSystems->getSystem<IInputSystem>()->unregisterEntity( _entity );
+        componentProvider->remove<ILocationComponent>( _entity );
+        componentProvider->remove<IInputComponent>( _entity );
+        componentProvider->remove<ICollisionComponent>( _entity );
+        componentProvider->remove<IRenderComponent>( _entity );
+        componentProvider->remove<ShootComponent>( _entity );
+        componentProvider->remove<ShipComponent>( _entity );
+        componentProvider->remove<ImpactComponent>( _entity );
 
         entityProvider->disposeEntity( _entity );
     }

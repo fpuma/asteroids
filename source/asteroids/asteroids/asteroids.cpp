@@ -24,6 +24,7 @@
 #include <engine/ecs/systems/iinputsystem.h>
 #include <engine/services/iengineapplicationservice.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <engine/ecs/systems/icollisionsystem.h>
 
 #include <asteroids/flow/layers/commonlayer.h>
@@ -34,12 +35,12 @@ namespace ast
 {
     namespace
     {
-        Entity spawnBackground()
+        pina::Entity spawnBackground()
         {
-            Entity result = gEntities->requestEntity();
+            pina::Entity result = gEntities->requestEntity();
 
-            gComponents->addComponent<ILocationComponent>( result );
-            auto renderComponent = gComponents->addComponent<IRenderComponent>( result );
+            gComponents->add<ILocationComponent>( result );
+            auto renderComponent = gComponents->add<IRenderComponent>( result );
 
             TextureInfo textureInfo;
             textureInfo.renderLayer = gData->kRenderLayers.Background;
@@ -48,16 +49,13 @@ namespace ast
 
             renderComponent->addTextureInfo( textureInfo );
 
-            gSystems->getSystem<IRenderSystem>()->registerEntity( result );
-
             return result;
         }
 
-        void unspawnBackground( Entity _entity )
+        void unspawnBackground( pina::Entity _entity )
         {
-            gComponents->removeComponent<ILocationComponent>( _entity );
-            gComponents->removeComponent<IRenderComponent>( _entity );
-            gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
+            gComponents->remove<ILocationComponent>( _entity );
+            gComponents->remove<IRenderComponent>( _entity );
             gEntities->disposeEntity( _entity );
         }
     }
@@ -77,15 +75,15 @@ namespace ast
         auto compProvider = gComponents;
 
         //Register classes
-        sysProvider->registerSystem<ShipMovementSystem>();
-        sysProvider->registerSystem<SpatialCageSystem>();
-        sysProvider->registerSystem<ShootSystem>();
-        sysProvider->registerSystem<RocksSystem>();
-        sysProvider->registerSystem<OutOfBoundSystem>();
-        sysProvider->registerSystem<ImpactSystem>();
-        compProvider->registerComponent<ShipComponent>();
-        compProvider->registerComponent<ShootComponent>();
-        compProvider->registerComponent<ImpactComponent>();
+        sysProvider->registerSystemClass<ShipMovementSystem>();
+        sysProvider->registerSystemClass<SpatialCageSystem>();
+        sysProvider->registerSystemClass<ShootSystem>();
+        sysProvider->registerSystemClass<RocksSystem>();
+        sysProvider->registerSystemClass<OutOfBoundSystem>();
+        sysProvider->registerSystemClass<ImpactSystem>();
+        compProvider->registerClass<ShipComponent>();
+        compProvider->registerClass<ShootComponent>();
+        compProvider->registerClass<ImpactComponent>();
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //Load all resources now. TODO: Need to improve this once I implement a resource manager that does not clash with the renderer being used in the render loop

@@ -16,21 +16,22 @@
 
 namespace ast
 {
-    Entity BulletSpawner::spawnBullet( Position _pos )
+    pina::Entity BulletSpawner::spawnBullet( Position _pos )
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        Entity bulletEntity = entityProvider->requestEntity();
+        pina::Entity bulletEntity = entityProvider->requestEntity();
 
         //Location
-        componentProvider->addComponent<ILocationComponent>( bulletEntity );
+        componentProvider->add<ILocationComponent>( bulletEntity );
 
         //Collision
-        auto collisionComponent = componentProvider->addComponent<ICollisionComponent>( bulletEntity );
+        auto collisionComponent = componentProvider->add<ICollisionComponent>( bulletEntity );
 
         leo::FrameInfo frameInfo;
-        gSystems->getSystem<ICollisionSystem>()->registerEntity( bulletEntity, frameInfo, leo::FrameType::Dynamic );
+
+        collisionComponent->init( leo::FrameType::Dynamic, frameInfo );
 
         leo::TriggerInfo triggerInfo;
         Circle circle = { Vec2(), gData->kBulletInfo.radius };
@@ -41,7 +42,7 @@ namespace ast
         collisionComponent->addTrigger( triggerInfo );
 
         //Render
-        auto renderComponent = componentProvider->addComponent<IRenderComponent>( bulletEntity );
+        auto renderComponent = componentProvider->add<IRenderComponent>( bulletEntity );
 
         TextureInfo textureInfo;
         textureInfo.texture = gData->kResourcesHandles.ShipTexture;
@@ -51,25 +52,21 @@ namespace ast
         textureInfo.textureSample = { {1.0f, 1.0f}, {0.666f, 0.666f} };
 
         renderComponent->addTextureInfo( textureInfo );
-        gSystems->getSystem<IRenderSystem>()->registerEntity( bulletEntity );
 
-        componentProvider->addComponent<ImpactComponent>( bulletEntity );
+        componentProvider->add<ImpactComponent>( bulletEntity );
 
         return bulletEntity;
     }
-
-    void BulletSpawner::unspawnBullet( Entity _entity )
+    
+    void BulletSpawner::unspawnBullet( pina::Entity _entity )
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        gSystems->getSystem<ICollisionSystem>()->unregisterEntity( _entity );
-        gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
-
-        componentProvider->removeComponent<ILocationComponent>( _entity );
-        componentProvider->removeComponent<ICollisionComponent>( _entity );
-        componentProvider->removeComponent<IRenderComponent>( _entity );
-        componentProvider->removeComponent<ImpactComponent>( _entity );
+        componentProvider->remove<ILocationComponent>( _entity );
+        componentProvider->remove<ICollisionComponent>( _entity );
+        componentProvider->remove<IRenderComponent>( _entity );
+        componentProvider->remove<ImpactComponent>( _entity );
 
         entityProvider->disposeEntity( _entity );
     }

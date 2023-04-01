@@ -4,6 +4,7 @@
 #include <asteroids/components/impactcomponent.h>
 #include <asteroids/fakedata/data.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <engine/ecs/systems/icollisionsystem.h>
 
 
@@ -22,9 +23,9 @@ namespace ast
         gSystems->unsubscribeSystemUpdate<ImpactSystem>( SystemUpdateId::CollisionStarted );
     }
 
-    void ImpactSystem::postPhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
+    void ImpactSystem::postPhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider )
     {
-        for (const Entity& ntt : m_pendingDisable)
+        for (const pina::Entity& ntt : m_pendingDisable)
         {
             _entityProvider.disableEntity( ntt );
         }
@@ -34,18 +35,18 @@ namespace ast
 
     void ImpactSystem::onCollisionStarted( leo::FramePartID _framePartPtrA, leo::FramePartID _framePartPtrB, leo::ContactPoint _contactPoint )
     {
-        Entity entityA = getEntityFromFramePart( _framePartPtrA );
+        pina::Entity entityA = getEntityFromFramePart( _framePartPtrA );
 
-        ComponentProvider* compProvider = gComponents;
+        pina::ComponentProvider* compProvider = gComponents;
 
-        if (compProvider->containsComponent<ImpactComponent>( entityA ))
+        if (compProvider->contains<ImpactComponent>( entityA ))
         {
-            Entity entityB = getEntityFromFramePart( _framePartPtrB );
+            pina::Entity entityB = getEntityFromFramePart( _framePartPtrB );
 
-            if (compProvider->containsComponent<ImpactComponent>( entityB ))
+            if (compProvider->contains<ImpactComponent>( entityB ))
             {
-                ImpactComponent* impactComponentA = compProvider->getComponent<ImpactComponent>( entityA );
-                ImpactComponent* impactComponentB = compProvider->getComponent<ImpactComponent>( entityB );
+                ImpactComponent* impactComponentA = compProvider->get<ImpactComponent>( entityA );
+                ImpactComponent* impactComponentB = compProvider->get<ImpactComponent>( entityB );
 
                 impactComponentA->setCurrentHp( impactComponentA->getCurrentHp() - impactComponentB->getDamage() );
                 impactComponentB->setCurrentHp( impactComponentB->getCurrentHp() - impactComponentA->getDamage() );
@@ -63,10 +64,10 @@ namespace ast
         }
     }
 
-    Entity ImpactSystem::getEntityFromFramePart( leo::FramePartID _framePartId ) const
+    pina::Entity ImpactSystem::getEntityFromFramePart( leo::FramePartID _framePartId ) const
     {
         leo::UserCollisionData userData = gSystems->getSystem<ICollisionSystem>()->getUserCollisionData( _framePartId );
-        return Entity( (size_t)userData );
+        return pina::Entity( (size_t)userData );
     }
 
 }

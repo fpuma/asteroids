@@ -26,9 +26,9 @@ namespace ast
     {
         MenuLayer* menuLayer = gLayerManager->getLayer<MenuLayer>( gData->kGameLayers.MenuLayer );
 
-        Entity menuControllerEntity = menuLayer->getMenuControllerEntity();
+        pina::Entity menuControllerEntity = menuLayer->getMenuControllerEntity();
 
-        IInputComponent* inputComponent = gComponents->getComponent<IInputComponent>( menuControllerEntity );
+        IInputComponent* inputComponent = gComponents->get<IInputComponent>( menuControllerEntity );
 
         if (inputComponent->isActionActive( gData->kInputActions.MenuAButton ))
         {

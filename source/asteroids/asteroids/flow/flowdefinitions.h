@@ -4,5 +4,6 @@
 
 namespace ast
 {
-    DECLARE_GENERIC_ID( LayerId, puma::s32, -1 );
+	class LayerId;
 }
+DECLARE_GENERIC_ID( ast::LayerId, puma::s32, -1 );

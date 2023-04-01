@@ -1,7 +1,7 @@
 #pragma once
 
-#include <modules/pina/system.h>
-#include <modules/pina/entity.h>
+#include <engine/ecs/systems/base/isystem.h>
+#include <pina/entity.h>
 #include <modules/leo/leodefinitions.h>
 
 #include <set>
@@ -10,7 +10,7 @@ using namespace puma;
 
 namespace ast
 {
-    class OutOfBoundSystem : public System
+    class OutOfBoundSystem : public ISystem
     {
     public:
 
@@ -18,7 +18,7 @@ namespace ast
         void onInit() override;
         void onUninit() override;
 
-        void postPhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider ) override;
+        void postPhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider ) override;
         void onCollisionStopped( leo::FramePartID _framePartPtrA, leo::FramePartID _framePartPtrB ) override;
 
     private:
@@ -26,8 +26,8 @@ namespace ast
         void spawnPlayfield();
         void unspawnPlayfield();
 
-        Entity m_playfield;
+        pina::Entity m_playfield;
         leo::FramePartID m_framePartId;
-        std::set<Entity> m_pendingDisable;
+        std::set<pina::Entity> m_pendingDisable;
     };
 }

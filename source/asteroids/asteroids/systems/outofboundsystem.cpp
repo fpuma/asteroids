@@ -4,6 +4,7 @@
 #include <asteroids/fakedata/data.h>
 
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
@@ -16,14 +17,13 @@ namespace ast
     {
         m_playfield = gEntities->requestEntity();
 
-        ComponentProvider* compProvider = gComponents;
-        SystemProvider* sysProvider = gSystems;
+        pina::ComponentProvider* compProvider = gComponents;
 
-        compProvider->addComponent<ILocationComponent>( m_playfield );
-        auto collisionComponent = compProvider->addComponent<ICollisionComponent>( m_playfield );
+        compProvider->add<ILocationComponent>( m_playfield );
+        auto collisionComponent = compProvider->add<ICollisionComponent>( m_playfield );
 
         leo::FrameInfo frameInfo;
-        sysProvider->getSystem<ICollisionSystem>()->registerEntity( m_playfield, frameInfo, leo::FrameType::Static );
+        collisionComponent->init( leo::FrameType::Static, frameInfo );
 
         Vec2 upperCorner =
         {
@@ -51,10 +51,8 @@ namespace ast
 
     void OutOfBoundSystem::unspawnPlayfield()
     {
-        gSystems->getSystem<ICollisionSystem>()->unregisterEntity( m_playfield );
-
-        gComponents->removeComponent<ICollisionComponent>( m_playfield );
-        gComponents->removeComponent<ILocationComponent>( m_playfield );
+        gComponents->remove<ICollisionComponent>( m_playfield );
+        gComponents->remove<ILocationComponent>( m_playfield );
 
         gEntities->disposeEntity( m_playfield );
     }
@@ -77,11 +75,12 @@ namespace ast
         m_pendingDisable.clear();
     }
 
-    void OutOfBoundSystem::postPhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
+    void OutOfBoundSystem::postPhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider )
     {
-        for (const Entity& ntt : m_pendingDisable)
+        for (const pina::Entity& ntt : m_pendingDisable)
         {
-            gEntities->disableEntity( ntt );
+            if (gEntities->isEntityEnabled( ntt )) // [TODO] Check why this is disabling an already disabled entity
+                gEntities->disableEntity( ntt );
         }
 
         m_pendingDisable.clear();
@@ -91,12 +90,12 @@ namespace ast
     {
         if (_framePartPtrA == m_framePartId)
         {
-            Entity ntt( (size_t)gSystems->getSystem<ICollisionSystem>()->getUserCollisionData( _framePartPtrB ) );
+            pina::Entity ntt( (size_t)gSystems->getSystem<ICollisionSystem>()->getUserCollisionData( _framePartPtrB ) );
             m_pendingDisable.insert( ntt );
         }
         else if (_framePartPtrB == m_framePartId)
         {
-            Entity ntt( (size_t)gSystems->getSystem<ICollisionSystem>()->getUserCollisionData( _framePartPtrA ) );
+            pina::Entity ntt( (size_t)gSystems->getSystem<ICollisionSystem>()->getUserCollisionData( _framePartPtrA ) );
             m_pendingDisable.insert( ntt );
         }
     }

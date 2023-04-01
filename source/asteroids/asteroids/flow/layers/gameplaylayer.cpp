@@ -14,6 +14,7 @@
 
 #include <engine/ecs/systems/icollisionsystem.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 
 namespace ast
 {
@@ -30,12 +31,12 @@ namespace ast
 
         initPhysics();
 
-        sysProvider->addSystem<ShipMovementSystem>();
-        sysProvider->addSystem<SpatialCageSystem>();
-        sysProvider->addSystem<ShootSystem>();
-        sysProvider->addSystem<RocksSystem>();
-        sysProvider->addSystem<OutOfBoundSystem>();
-        sysProvider->addSystem<ImpactSystem>();
+        sysProvider->requestSystem<ShipMovementSystem>();
+        sysProvider->requestSystem<SpatialCageSystem>();
+        sysProvider->requestSystem<ShootSystem>();
+        sysProvider->requestSystem<RocksSystem>();
+        sysProvider->requestSystem<OutOfBoundSystem>();
+        sysProvider->requestSystem<ImpactSystem>();
 
         m_shipEntity = ShipSpawner::spawnShip( Position() );
     }
@@ -46,20 +47,21 @@ namespace ast
 
         auto sysProvider = gSystems;
 
-        sysProvider->removeSystem<ShipMovementSystem>();
-        sysProvider->removeSystem<SpatialCageSystem>();
-        sysProvider->removeSystem<ShootSystem>();
-        sysProvider->removeSystem<RocksSystem>();
-        sysProvider->removeSystem<OutOfBoundSystem>();
-        sysProvider->removeSystem<ImpactSystem>();
+        sysProvider->releaseSystem<ShipMovementSystem>();
+        sysProvider->releaseSystem<SpatialCageSystem>();
+        sysProvider->releaseSystem<ShootSystem>();
+        sysProvider->releaseSystem<RocksSystem>();
+        sysProvider->releaseSystem<OutOfBoundSystem>();
+        sysProvider->releaseSystem<ImpactSystem>();
 
-        sysProvider->removeSystem<ICollisionSystem>();
+        sysProvider->releaseSystem<ICollisionSystem>();
 
     }
 
     void GameplayLayer::initPhysics()
     {
-        auto collisionSystem = gSystems->addSystem<ICollisionSystem>();
+        gSystems->requestSystem<ICollisionSystem>();
+        auto collisionSystem = gSystems->getSystem<ICollisionSystem>();
         collisionSystem->setGravity( { 0.0f, 0.0f } );
         //collisionSystem->enableDebugDraw();
         collisionSystem->setCollisionCompatibility( gData->kCollisionCompatibility );

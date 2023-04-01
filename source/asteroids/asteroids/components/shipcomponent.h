@@ -1,6 +1,6 @@
 #pragma once
 
-#include <modules/pina/component.h>
+#include <pina/component.h>
 #include <utils/geometry/vec2.h>
 #include <utils/geometry/geometryhelpers.h>
 
@@ -10,7 +10,7 @@ using namespace puma;
 
 namespace ast
 {
-    class ShipComponent : public Component
+    class ShipComponent : public pina::Component
     {
     public:
 

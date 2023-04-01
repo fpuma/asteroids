@@ -7,6 +7,7 @@
 #include <engine/ecs/components/icameracomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <engine/services/iengineapplicationservice.h>
 
 #include <asteroids/fakedata/data.h>
@@ -21,8 +22,8 @@ namespace ast
     {
         auto sysProvider = gSystems;
 
-        sysProvider->addSystem<IRenderSystem>();
-        sysProvider->addSystem<IInputSystem>();
+        sysProvider->requestSystem<IRenderSystem>();
+        sysProvider->requestSystem<IInputSystem>();
 
         initCamera();
     }
@@ -33,19 +34,19 @@ namespace ast
 
         auto sysProvider = gSystems;
 
-        sysProvider->removeSystem<IRenderSystem>();
-        sysProvider->removeSystem<IInputSystem>();
+        sysProvider->releaseSystem<IRenderSystem>();
+        sysProvider->releaseSystem<IInputSystem>();
     }
 
     void CommonLayer::initCamera()
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
         m_cameraEntity = entityProvider->requestEntity();
 
-        auto cameraComponent = componentProvider->addComponent<ICameraComponent>( m_cameraEntity );
-        auto locationComponent = componentProvider->addComponent<ILocationComponent>( m_cameraEntity );
+        auto cameraComponent = componentProvider->add<ICameraComponent>( m_cameraEntity );
+        auto locationComponent = componentProvider->add<ILocationComponent>( m_cameraEntity );
 
         cameraComponent->setMetersPerPixel( 1.0f );
         gEngineApplication->setCameraEntity( m_cameraEntity );
@@ -55,11 +56,11 @@ namespace ast
 
     void CommonLayer::uninitCamera()
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        componentProvider->removeComponent<ICameraComponent>( m_cameraEntity );
-        componentProvider->removeComponent<ILocationComponent>( m_cameraEntity );
+        componentProvider->remove<ICameraComponent>( m_cameraEntity );
+        componentProvider->remove<ILocationComponent>( m_cameraEntity );
 
         entityProvider->disposeEntity( m_cameraEntity );
     }

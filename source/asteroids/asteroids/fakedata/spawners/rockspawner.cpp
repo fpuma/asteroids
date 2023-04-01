@@ -16,21 +16,22 @@
 
 namespace ast
 {
-    Entity RockSpawner::spawnRock( )
+    pina::Entity RockSpawner::spawnRock( )
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        Entity rockEntity = entityProvider->requestEntity();
+        pina::Entity rockEntity = entityProvider->requestEntity();
 
         //Location
-        componentProvider->addComponent<ILocationComponent>( rockEntity );
+        componentProvider->add<ILocationComponent>( rockEntity );
 
         //Collision
-        auto collisionComponent = componentProvider->addComponent<ICollisionComponent>( rockEntity );
+        auto collisionComponent = componentProvider->add<ICollisionComponent>( rockEntity );
 
         leo::FrameInfo frameInfo;
-        gSystems->getSystem<ICollisionSystem>()->registerEntity( rockEntity, frameInfo, leo::FrameType::Dynamic );
+
+        collisionComponent->init( leo::FrameType::Dynamic, frameInfo);
 
         leo::BodyInfo bodyInfo;
         Circle circle = { Vec2(), gData->kRockInfo.radius };
@@ -41,7 +42,7 @@ namespace ast
         collisionComponent->addBody( bodyInfo );
 
         //Render
-        auto renderComponent = componentProvider->addComponent<IRenderComponent>( rockEntity );
+        auto renderComponent = componentProvider->add<IRenderComponent>( rockEntity );
 
         TextureInfo textureInfo;
         textureInfo.texture = gData->kResourcesHandles.RockTexture;
@@ -49,26 +50,22 @@ namespace ast
         textureInfo.renderSize = { gData->kRockInfo.radius*2, gData->kRockInfo.radius*2 };
 
         renderComponent->addTextureInfo( textureInfo );
-        gSystems->getSystem<IRenderSystem>()->registerEntity( rockEntity );
 
-        auto impactComponent = componentProvider->addComponent<ImpactComponent>( rockEntity );
+        auto impactComponent = componentProvider->add<ImpactComponent>( rockEntity );
         impactComponent->setCurrentHp( 10 );
 
         return rockEntity;
     }
 
-    void RockSpawner::unspawnRock( Entity _entity )
+    void RockSpawner::unspawnRock( pina::Entity _entity )
     {
-        EntityProvider* entityProvider = gEntities;
-        ComponentProvider* componentProvider = gComponents;
+        pina::EntityProvider* entityProvider = gEntities;
+        pina::ComponentProvider* componentProvider = gComponents;
 
-        gSystems->getSystem<ICollisionSystem>()->unregisterEntity( _entity );
-        gSystems->getSystem<IRenderSystem>()->unregisterEntity( _entity );
-
-        componentProvider->removeComponent<ILocationComponent>( _entity );
-        componentProvider->removeComponent<ICollisionComponent>( _entity );
-        componentProvider->removeComponent<IRenderComponent>( _entity );
-        componentProvider->removeComponent<ImpactComponent>( _entity );
+        componentProvider->remove<ILocationComponent>( _entity );
+        componentProvider->remove<ICollisionComponent>( _entity );
+        componentProvider->remove<IRenderComponent>( _entity );
+        componentProvider->remove<ImpactComponent>( _entity );
 
         entityProvider->disposeEntity( _entity );
     }

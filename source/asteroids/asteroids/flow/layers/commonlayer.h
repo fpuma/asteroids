@@ -1,7 +1,7 @@
 #pragma once
 
 #include <asteroids/flow/layers/base/ilayer.h>
-#include <modules/pina/entity.h>
+#include <pina/entity.h>
 
 namespace ast
 {
@@ -20,7 +20,7 @@ namespace ast
         void initCamera();
         void uninitCamera();
 
-        Entity m_cameraEntity;
+        pina::Entity m_cameraEntity;
 
     };
 }

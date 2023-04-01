@@ -1,13 +1,13 @@
 #pragma once
 
-#include <modules/pina/component.h>
+#include <pina/component.h>
 #include <engine/utils/cooldown.h>
 
 using namespace puma;
 
 namespace ast
 {
-    class ShootComponent : public puma::Component
+    class ShootComponent : public pina::Component
     {
     public:
 

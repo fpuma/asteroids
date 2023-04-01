@@ -1,13 +1,13 @@
 #pragma once
 
-#include <modules/pina/component.h>
+#include <pina/component.h>
 #include <utils/numerictypes.h>
 
 using namespace puma;
 
 namespace ast
 {
-    class ImpactComponent : public Component
+    class ImpactComponent : public pina::Component
     {
     public:
 

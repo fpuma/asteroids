@@ -1,6 +1,6 @@
 #pragma once
 
-#include <modules/pina/entity.h>
+#include <pina/entity.h>
 #include <engine/utils/position.h>
 #include <modules/nina/ninadefinitions.h>
 
@@ -11,8 +11,8 @@ namespace ast
     {
     public:
 
-        static Entity spawnShip( Position _pos );
-        static void unspawnShip( Entity _entity );
+        static pina::Entity spawnShip( Position _pos );
+        static void unspawnShip( pina::Entity _entity );
 
     };
 }

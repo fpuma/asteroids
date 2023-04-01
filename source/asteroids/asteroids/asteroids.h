@@ -1,6 +1,6 @@
 #pragma once
 
-#include <modules/pina/entity.h>
+#include <pina/entity.h>
 #include <engine/igame.h>
 #include <asteroids/fakedata/data.h>
 #include <utils/statemachine/statemachine.h>
@@ -19,7 +19,7 @@ namespace ast
 
     private:
 
-        Entity m_backgroundEntity;
+        pina::Entity m_backgroundEntity;
 
         StatelessMachine<AsteroidsGameState> m_stateMachine;
         StateMachineInfo m_stateMachineInfo;

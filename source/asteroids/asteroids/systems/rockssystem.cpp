@@ -6,6 +6,7 @@
 #include <asteroids/components/impactcomponent.h>
 #include <asteroids/components/shootcomponent.h>
 #include <engine/services/ecsservice.h>
+#include <engine/services/systemsservice.h>
 #include <engine/ecs/components/iinputcomponent.h>
 #include <engine/ecs/components/icollisioncomponent.h>
 #include <engine/ecs/components/ilocationcomponent.h>
@@ -38,7 +39,7 @@ namespace ast
         gSystems->subscribeSystemUpdate<RocksSystem>( SystemUpdateId::PrePhysics );
         gSystems->subscribeSystemUpdate<RocksSystem>( SystemUpdateId::QueueRenderables );
 
-        for (Entity& rock : m_rocks)
+        for (pina::Entity& rock : m_rocks)
         {
             rock = RockSpawner::spawnRock();
             gEntities->disableEntity( rock );
@@ -78,18 +79,18 @@ namespace ast
         gSystems->unsubscribeSystemUpdate<RocksSystem>( SystemUpdateId::PrePhysics );
         gSystems->unsubscribeSystemUpdate<RocksSystem>( SystemUpdateId::QueueRenderables );
 
-        for (Entity& rock : m_rocks)
+        for (pina::Entity& rock : m_rocks)
         {
             RockSpawner::unspawnRock( rock );
         }
     }
 
-    void RocksSystem::prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider )
+    void RocksSystem::prePhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider )
     {
 
         if (m_spawnCooldown.cooldownReady())
         {
-            auto itRock = std::find_if( m_rocks.begin(), m_rocks.end(), [&_entityProvider]( const Entity& ntt )
+            auto itRock = std::find_if( m_rocks.begin(), m_rocks.end(), [&_entityProvider]( const pina::Entity& ntt )
                 {
                     return !_entityProvider.isEntityEnabled( ntt );
                 } );
@@ -97,9 +98,9 @@ namespace ast
             assert( itRock != m_rocks.end() ); // Rock pool is too small
             if (itRock != m_rocks.end())
             {
-                Entity rockEntity = *itRock;
+                pina::Entity rockEntity = *itRock;
                 _entityProvider.enableEntity( rockEntity );
-                ICollisionComponent* collisionComponent = _componentProvider.getComponent<ICollisionComponent>( rockEntity );
+                ICollisionComponent* collisionComponent = _componentProvider.get<ICollisionComponent>( rockEntity );
 
                 u32 index = m_random.generateRandom( 0, 7 );
                 Position origin = randomPoint( m_rockPoints[index], m_random );
@@ -114,7 +115,7 @@ namespace ast
                 dir = dir.normalize();
                 frame->setLinearVelocity( dir * 100.0f );
 
-                ImpactComponent* impactComponent = gComponents->getComponent<ImpactComponent>( rockEntity );
+                ImpactComponent* impactComponent = gComponents->get<ImpactComponent>( rockEntity );
                 impactComponent->setCurrentHp( 10 );
             }
         }
@@ -123,12 +124,12 @@ namespace ast
 
     void RocksSystem::queueRenderables( IRenderQueue& _renderQueue )
     {
-        for (const Entity& ntt : m_rocks)
+        for (const pina::Entity& ntt : m_rocks)
         {
             if (gEntities->isEntityEnabled( ntt ))
             {
-                ImpactComponent* impactComponent = gComponents->getComponent<ImpactComponent>( ntt );
-                ILocationComponent* locationComponent = gComponents->getComponent<ILocationComponent>( ntt );
+                ImpactComponent* impactComponent = gComponents->get<ImpactComponent>( ntt );
+                ILocationComponent* locationComponent = gComponents->get<ILocationComponent>( ntt );
                 _renderQueue.addDebugRenderableText( formatString( "HP: %d", impactComponent->getCurrentHp() ), Color::White(), locationComponent->getPosition() );
             }
         }

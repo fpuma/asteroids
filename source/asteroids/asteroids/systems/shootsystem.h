@@ -1,7 +1,7 @@
 #pragma once
 
-#include <modules/pina/system.h>
-#include <modules/pina/entity.h>
+#include <engine/ecs/systems/base/isystem.h>
+#include <pina/entity.h>
 
 #include <array>
 #include <set>
@@ -10,23 +10,18 @@ using namespace puma;
 
 namespace ast
 {
-    class ShootSystem : public puma::System
+    class ShootSystem : public puma::ISystem
     {
     public:
 
         void onInit() override;
         void onUninit() override;
 
-        void prePhysicsUpdate( EntityProvider& _entityProvider, ComponentProvider& _componentProvider ) override;
-
-        void registerEntity( Entity _entity );
-        void unregisterEntity( Entity _entity );
+        void prePhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider ) override;
 
     private:
 
-        std::set<Entity> m_entities;
-
-        std::array<Entity, 100> m_bullets;
+        std::array<pina::Entity, 100> m_bullets;
 
     };
 }

@@ -24,19 +24,16 @@ namespace ast
     {
         m_menuController = gEntities->requestEntity();
 
-        auto inputComponent = gComponents->addComponent<IInputComponent>( m_menuController );
+        auto inputComponent = gComponents->add<IInputComponent>( m_menuController );
 
         for (const auto& inputMap : gData->kMenuKeyboardKeyInput)
         {
             inputComponent->addInputMap( inputMap.inputAction, inputMap.keyInput );
         }
 
-        gSystems->getSystem<IInputSystem>()->registerEntity( m_menuController );
-
-
         m_pressAToContinue = gEntities->requestEntity();
 
-        auto renderComponent = gComponents->addComponent<IRenderComponent>( m_pressAToContinue );
+        auto renderComponent = gComponents->add<IRenderComponent>( m_pressAToContinue );
 
         TextureInfo textureInfo;
         textureInfo.renderLayer = gData->kRenderLayers.Foreground;
@@ -46,21 +43,18 @@ namespace ast
         textureInfo.renderSize = { 50.0f * ratio, 50.0f };
         renderComponent->addTextureInfo( textureInfo );
         
-        auto locationComponent = gComponents->addComponent<ILocationComponent>( m_pressAToContinue );
+        auto locationComponent = gComponents->add<ILocationComponent>( m_pressAToContinue );
         locationComponent->setPosition( { 0.0f, 0.0f } );
 
-        gSystems->getSystem<IRenderSystem>()->registerEntity( m_pressAToContinue );
     }
 
     void MenuLayer::onUninit()
     {
-        gSystems->getSystem<IRenderSystem>()->unregisterEntity( m_pressAToContinue );
-        gComponents->removeComponent<ILocationComponent>( m_pressAToContinue );
-        gComponents->removeComponent<IRenderComponent>( m_pressAToContinue );
+        gComponents->remove<ILocationComponent>( m_pressAToContinue );
+        gComponents->remove<IRenderComponent>( m_pressAToContinue );
         gEntities->disposeEntity( m_pressAToContinue );
 
-        gSystems->getSystem<IInputSystem>()->unregisterEntity( m_menuController );
-        gComponents->removeComponent<IInputComponent>( m_menuController );
+        gComponents->remove<IInputComponent>( m_menuController );
         gEntities->disposeEntity( m_menuController );
 
     }
