@@ -2,9 +2,9 @@
 
 #include "gameplaystate.h"
 
+#include <asteroids/components/shipcomponent.h>
 #include <asteroids/flow/layers/base/layermanager.h>
 #include <asteroids/flow/layers/gameplaylayer.h>
-#include <asteroids/systems/shipmovementsystem.h>
 #include <engine/services/ecsservice.h>
 #include <engine/services/systemsservice.h>
 #include <engine/ecs/systems/icollisionsystem.h>
@@ -28,14 +28,13 @@ namespace ast
 
     void GameplayState::update( StateMachineInfo& _info )
     {
-        ShipMovementSystem* shipSystem = gSystems->getSystem<ShipMovementSystem>();
-        pina::Entity shipEntity = shipSystem->getShipEntity();
+        auto shipEntities = gECS->getEntitesByComponents<ShipComponent>();
+        pina::Entity shipEntity;
 
-        if (!gEntities->isEntityEnabled( shipEntity ))
+        if (shipEntities.empty())
         {
             _info.currentStateId = gData->kGameStates.MenuState;
         }
-
     }
 
     void GameplayState::onExit( StateMachineInfo& _info )

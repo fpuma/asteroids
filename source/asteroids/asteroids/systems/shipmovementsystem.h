@@ -16,14 +16,10 @@ namespace ast
 
         void prePhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider ) override;
         void queueRenderables( IRenderQueue& _renderQueue ) override;
-        void setShipEntity( pina::Entity _entity ) { m_shipEntity = _entity; }
-
-        pina::Entity getShipEntity() const { return m_shipEntity; }
 
     private:
 
         float processCurrentAngle( float _rawAngle );
 
-        pina::Entity m_shipEntity;
     };
 }

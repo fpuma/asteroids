@@ -88,88 +88,92 @@ namespace ast
 
     void ShipMovementSystem::prePhysicsUpdate( pina::EntityProvider& _entityProvider, pina::ComponentProvider& _componentProvider )
     {
-        if (!gEntities->isEntityEnabled( m_shipEntity )) return;
+        auto entities = gECS->getEntitesByComponents<ShipComponent, IInputComponent, ICollisionComponent>();
 
-        IInputComponent* inputComponent = _componentProvider.get<IInputComponent>( m_shipEntity );
-        ShipComponent* shipComponent = _componentProvider.get<ShipComponent>( m_shipEntity );
-
-        ICollisionComponent* collisionComponent = _componentProvider.get<ICollisionComponent>( m_shipEntity );
-        leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
-
-        //Process controller input
-        if (inputComponent->isActionActive( gData->kInputActions.MoveShip ))
+        for (pina::Entity entity : entities)
         {
-            InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.MoveShip );
+            assert( entities.size() == 1 );
+            IInputComponent* inputComponent = _componentProvider.get<IInputComponent>( entity );
+            ShipComponent* shipComponent = _componentProvider.get<ShipComponent>( entity );
 
-            Vec2 direction = { extraInfo.x, extraInfo.y };
+            ICollisionComponent* collisionComponent = _componentProvider.get<ICollisionComponent>( entity );
+            leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
 
-            shipComponent->setDirection( direction );
-        }
-
-        if (inputComponent->isActionActive( gData->kInputActions.RotateShip ))
-        {
-            InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.RotateShip );
-
-            Vec2 direction = { extraInfo.x, extraInfo.y };
-            if (direction.length() > 0.5f)
+            //Process controller input
+            if (inputComponent->isActionActive( gData->kInputActions.MoveShip ))
             {
+                InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.MoveShip );
+
+                Vec2 direction = { extraInfo.x, extraInfo.y };
+
+                shipComponent->setDirection( direction );
+            }
+
+            if (inputComponent->isActionActive( gData->kInputActions.RotateShip ))
+            {
+                InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.RotateShip );
+
+                Vec2 direction = { extraInfo.x, extraInfo.y };
+                if (direction.length() > 0.5f)
+                {
+                    //New angle
+                    direction = direction.normalize();
+                    float newAngle = std::acos( direction.x );
+                    newAngle = extraInfo.y < 0.0f ? 2.0f * PI - newAngle : newAngle;
+
+                    shipComponent->setDesiredeAngle( newAngle );
+                }
+            }
+            //-----------------------------------
+
+            //Process mouse and keyboard input
+
+            handleKbMovement( inputComponent, shipComponent );
+
+            if (inputComponent->isActionActive( gData->kInputActions.MouseAimShip ))
+            {
+                InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.MouseAimShip );
+
+                Position worldMousePos = erh::screenPointToWorld( { static_cast<s32>(extraInfo.x), static_cast<s32>(extraInfo.y) } );
+
+                Vec2 direction = worldMousePos - frame->getPosition();
+
                 //New angle
                 direction = direction.normalize();
                 float newAngle = std::acos( direction.x );
-                newAngle = extraInfo.y < 0.0f ? 2.0f * PI - newAngle : newAngle;
+                newAngle = worldMousePos.y < frame->getPosition().y ? 2.0f * PI - newAngle : newAngle;
 
                 shipComponent->setDesiredeAngle( newAngle );
             }
-        }
-        //-----------------------------------
 
-        //Process mouse and keyboard input
+            //-----------------------------------
 
-        handleKbMovement( inputComponent, shipComponent );
+            Vec2 currentForce = shipComponent->getCurrentForce();
+            if (currentForce.length() > 0.0f)
+            {
+                frame->applyForceToCenter( currentForce );
+            }
 
-        if (inputComponent->isActionActive( gData->kInputActions.MouseAimShip ))
-        {
-            InputActionExtraInfo extraInfo = inputComponent->getInputActionExtraInfo( gData->kInputActions.MouseAimShip );
+            //Update angle
+            float desiredAngle = shipComponent->getDesiredAngle();
 
-            Position worldMousePos = erh::screenPointToWorld( { static_cast<s32>(extraInfo.x), static_cast<s32>(extraInfo.y) } );
+            float currentAngle = processCurrentAngle( frame->getAngle() );
+            float deltaAngle = desiredAngle - currentAngle;
+            float absDeltaAngle = std::fabsf( deltaAngle );
 
-            Vec2 direction = worldMousePos - frame->getPosition();
+            if (absDeltaAngle < 0.07f)
+            {
+                frame->setAngle( desiredAngle );
+                frame->setAngularVelocity( 0.0f );
+            }
+            else
+            {
+                float angularSign = deltaAngle < 0 ? -1.0f : 1.0f;
+                angularSign = absDeltaAngle > PI ? angularSign * -1.0f : angularSign;
 
-            //New angle
-            direction = direction.normalize();
-            float newAngle = std::acos( direction.x );
-            newAngle = worldMousePos.y < frame->getPosition().y ? 2.0f * PI - newAngle : newAngle;
-
-            shipComponent->setDesiredeAngle( newAngle );
-        }
-
-        //-----------------------------------
-
-        Vec2 currentForce = shipComponent->getCurrentForce();
-        if (currentForce.length() > 0.0f)
-        {
-            frame->applyForceToCenter( currentForce );
-        }
-
-        //Update angle
-        float desiredAngle = shipComponent->getDesiredAngle();
-
-        float currentAngle = processCurrentAngle( frame->getAngle() );
-        float deltaAngle = desiredAngle - currentAngle;
-        float absDeltaAngle = std::fabsf( deltaAngle );
-
-        if (absDeltaAngle < 0.07f)
-        {
-            frame->setAngle( desiredAngle );
-            frame->setAngularVelocity( 0.0f );
-        }
-        else
-        {
-            float angularSign = deltaAngle < 0 ? -1.0f : 1.0f;
-            angularSign = absDeltaAngle > PI ? angularSign * -1.0f : angularSign;
-
-            float angularVelocity = shipComponent->getTurningSpeed() * angularSign;
-            frame->setAngularVelocity( angularVelocity );
+                float angularVelocity = shipComponent->getTurningSpeed() * angularSign;
+                frame->setAngularVelocity( angularVelocity );
+            }
         }
     }
 
@@ -183,20 +187,25 @@ namespace ast
 
     void ShipMovementSystem::queueRenderables( IRenderQueue& _renderQueue )
     {
-        if (!gEntities->isEntityEnabled( m_shipEntity )) return;
-        //ICollisionComponent* collisionComponent = gComponents->get<ICollisionComponent>( m_shipEntity );
-        ILocationComponent* locationComponent = gComponents->get<ILocationComponent>( m_shipEntity );
-        //leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
-        //ShipComponent* shipComponent = gComponents->get<ShipComponent>( m_shipEntity );
+        auto entities = gECS->getEntitesByComponents<ShipComponent, ImpactComponent, ILocationComponent>();
 
-        //_renderQueue.addDebugRenderableText( formatString( "AVel: %.4f", frame->getAngularVelocity() ),Color::White(), locationComponent->getPosition() );
-        //_renderQueue.addDebugRenderableText( formatString( "RAng: %.4f", frame->getAngle() ), Color::White(), locationComponent->getPosition() + Position( 0.0f, 12.5f ) );
-        //_renderQueue.addDebugRenderableText( formatString( "PAng: %.4f", processCurrentAngle( frame->getAngle() ) ), Color::White(), locationComponent->getPosition() + Position( 0.0f, 25.0f ) );
-        //_renderQueue.addDebugRenderableText( formatString( "DAng: %.4f", shipComponent->getDesiredAngle() ), Color::White(), locationComponent->getPosition() + Position(0.0f, 37.5f ));
+        for (pina::Entity entity : entities)
+        {
+            //ICollisionComponent* collisionComponent = gComponents->get<ICollisionComponent>( entity );
+            ILocationComponent* locationComponent = gComponents->get<ILocationComponent>( entity );
+            //leo::IDynamicFrame* frame = collisionComponent->getDynamicFrame();
+            //ShipComponent* shipComponent = gComponents->get<ShipComponent>( entity );
 
-        //_renderQueue.addDebugRenderableText( formatString( "Vel: %.4f", frame->getLinearVelocity().length() ), Color::White(), locationComponent->getPosition() );
+            //_renderQueue.addDebugRenderableText( formatString( "AVel: %.4f", frame->getAngularVelocity() ),Color::White(), locationComponent->getPosition() );
+            //_renderQueue.addDebugRenderableText( formatString( "RAng: %.4f", frame->getAngle() ), Color::White(), locationComponent->getPosition() + Position( 0.0f, 12.5f ) );
+            //_renderQueue.addDebugRenderableText( formatString( "PAng: %.4f", processCurrentAngle( frame->getAngle() ) ), Color::White(), locationComponent->getPosition() + Position( 0.0f, 25.0f ) );
+            //_renderQueue.addDebugRenderableText( formatString( "DAng: %.4f", shipComponent->getDesiredAngle() ), Color::White(), locationComponent->getPosition() + Position(0.0f, 37.5f ));
 
-        ImpactComponent* impactComponent = gComponents->get<ImpactComponent>( m_shipEntity );
-        _renderQueue.addDebugRenderableText( formatString( "HP: %d", impactComponent->getCurrentHp() ), Color::White(), locationComponent->getPosition() );
+            //_renderQueue.addDebugRenderableText( formatString( "Vel: %.4f", frame->getLinearVelocity().length() ), Color::White(), locationComponent->getPosition() );
+
+            ImpactComponent* impactComponent = gComponents->get<ImpactComponent>( entity );
+            _renderQueue.addDebugRenderableText( formatString( "HP: %d", impactComponent->getCurrentHp() ), Color::White(), locationComponent->getPosition() );
+        }
+
     }
 }

@@ -91,8 +91,6 @@ namespace ast
         shootComponent->setBulletSpeed( gData->kBulletInfo.speed );
         shootComponent->setFireRate( gData->kBulletInfo.fireRate );
 
-        gSystems->getSystem<ShipMovementSystem>()->setShipEntity( shipEntity );
-
         auto impactComponent = componentProvider->add<ImpactComponent>( shipEntity );
         impactComponent->setCurrentHp( 10 );
         impactComponent->setDefaultHp( 10 );
